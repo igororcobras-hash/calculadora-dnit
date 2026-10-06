@@ -149,6 +149,44 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 .splash-card.detectado .splash-tag{display:inline-block;}
 .splash-note{font-size:11.5px;color:rgba(255,255,255,.6);margin-top:18px;line-height:1.5;}
 
+/* ============================================================
+   LOGIN E NUVEM
+   ============================================================ */
+#login{position:fixed;top:0;right:0;bottom:0;left:0;z-index:9998;overflow-y:auto;
+  background:var(--nav-bg);color:#fff;display:flex;padding:32px 16px;}
+#login .cx{width:100%;max-width:420px;margin:auto;}
+#login .norma{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.62);}
+#login h2{font-size:24px;font-weight:700;line-height:1.2;margin:6px 0 4px;text-wrap:balance;}
+#login .sub{font-size:13.5px;color:rgba(255,255,255,.78);margin-bottom:24px;}
+#login label{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,.85);margin-bottom:5px;}
+#login input{width:100%;padding:11px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.3);
+  background:rgba(255,255,255,.1);color:#fff;font-size:16px;font-family:inherit;margin-bottom:14px;}
+#login input:focus{outline:2px solid #9cc3ff;outline-offset:1px;}
+#login input::placeholder{color:rgba(255,255,255,.45);}
+#login button{width:100%;padding:12px;border-radius:6px;border:none;background:#2563EB;color:#fff;
+  font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;}
+#login button:hover{background:#1d4ed8;}
+#login button[disabled]{opacity:.6;cursor:default;}
+#login .msg{margin-top:14px;padding:10px 12px;border-radius:6px;font-size:13px;line-height:1.5;display:none;}
+#login .msg.erro{display:block;background:#7a2e0e;color:#ffd9c7;}
+#login .msg.info{display:block;background:rgba(255,255,255,.12);color:rgba(255,255,255,.9);}
+#login .rodape{font-size:11.5px;color:rgba(255,255,255,.55);margin-top:22px;line-height:1.5;}
+.sessao-bar{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--nav-fg);}
+.sessao-bar .quem{opacity:.85;}
+.sessao-bar .selo{background:rgba(255,255,255,.18);border-radius:3px;padding:2px 6px;font-weight:700;font-size:10px;letter-spacing:.5px;text-transform:uppercase;}
+#modal{position:fixed;top:0;right:0;bottom:0;left:0;z-index:9997;background:rgba(0,0,0,.45);
+  display:flex;padding:24px 16px;overflow-y:auto;}
+#modal .cx{background:var(--bg2);color:var(--fg);border-radius:8px;max-width:720px;width:100%;margin:auto;
+  padding:18px 20px;box-shadow:0 8px 32px rgba(0,0,0,.3);}
+#modal h3{font-size:16px;font-weight:700;color:var(--accent);margin-bottom:4px;}
+#modal .fechar{float:right;background:none;border:1px solid var(--border);border-radius:5px;
+  color:var(--fg2);cursor:pointer;padding:4px 10px;font-size:12px;font-family:inherit;}
+.lista-nuvem{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:12px;}
+.lista-nuvem th{background:var(--bg);color:var(--fg2);padding:6px 8px;text-align:left;font-size:11px;border-bottom:1px solid var(--border);}
+.lista-nuvem td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.lista-nuvem input[type=date],.lista-nuvem input[type=text]{padding:4px 6px;border:1px solid var(--inp-border);
+  background:var(--inp);color:var(--fg);border-radius:4px;font-size:12px;font-family:inherit;}
+
 /* Avisos (substituem as janelas de alerta do navegador) */
 #aviso{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
   width:max-content;max-width:min(92vw,560px);background:var(--fg);color:var(--bg);
@@ -206,7 +244,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
   <p class="ai-carregando">Carregando a calculadora…</p>
   <div class="ai-explica">
     <p><b>O programa da calculadora não foi executado por este visualizador.</b></p>
-    <p>No iPhone e no iPad, o WhatsApp, o Mail e o app Arquivos mostram arquivos .html apenas como pré-visualização, sem executar programas. Para usar no iPhone/iPad, abra a calculadora pelo endereço da internet, no Safari ou no Chrome:<br><a href="https://igororcobras-hash.github.io/calculadora-dnit/">https://igororcobras-hash.github.io/calculadora-dnit/</a></p>
+    <p>No iPhone e no iPad, o WhatsApp, o Mail e o app Arquivos mostram arquivos .html apenas como pré-visualização, sem executar programas. Para usar no iPhone/iPad, abra a calculadora pelo endereço da internet, no Safari ou no Chrome:<br><a href="https://wfajardoeng-cmyk.github.io/Calculadora_Pavimento_Flex-vel/">https://wfajardoeng-cmyk.github.io/Calculadora_Pavimento_Flex-vel/</a><br><span style="font-size:13px;color:#4a5568">Se esse endereço não abrir, use este:</span><br><a href="https://raw.githack.com/wfajardoeng-cmyk/Calculadora_Pavimento_Flex-vel/main/index.html">https://raw.githack.com/wfajardoeng-cmyk/Calculadora_Pavimento_Flex-vel/main/index.html</a></p>
     <p>No Android e no computador, abra este arquivo com um navegador: Chrome, Edge, Firefox, Safari, Opera ou Samsung Internet.</p>
   </div>
   <p id="aviso-erro" class="ai-erro" hidden></p>
@@ -226,6 +264,35 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
   };
   setTimeout(function () {if (!window.__calcIniciada) revelar('A calculadora não terminou de iniciar. Navegador: ' + navigator.userAgent);}, 12000);
 })();</script>
+
+<!-- LOGIN (exibido apenas quando a nuvem está configurada) -->
+<div id="login" hidden>
+  <div class="cx">
+    <div class="norma">DNIT IP-06/2004 · IPR-719</div>
+    <h2>Calculadora de Pavimento Flexível</h2>
+    <div class="sub">Acesso restrito. Informe seu usuário (ou e-mail) e a senha.</div>
+    <form id="form-login" autocomplete="on">
+      <label for="log_usuario">Usuário ou e-mail</label>
+      <input type="text" id="log_usuario" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="seu usuário ou e-mail">
+      <label for="log_senha">Senha</label>
+      <input type="password" id="log_senha" autocomplete="current-password" placeholder="sua senha">
+      <button type="submit" id="btn-entrar">Entrar</button>
+    </form>
+    <div class="msg" id="login-msg"></div>
+    <div class="rodape">
+      Não tem acesso? Solicite ao administrador.<br>
+      Versão 14 · 06/10/2026
+    </div>
+  </div>
+</div>
+
+<!-- Janela de projetos na nuvem / administração -->
+<div id="modal" hidden><div class="cx">
+  <button class="fechar" type="button" onclick="fecharModal()">Fechar</button>
+  <h3 id="modal-titulo">—</h3>
+  <p id="modal-sub" style="font-size:12px;color:var(--fg2);"></p>
+  <div id="modal-corpo"></div>
+</div></div>
 
 <!-- TELA INICIAL: Seleção do ambiente de uso -->
 <div id="splash" role="dialog" aria-modal="true" aria-labelledby="splash-titulo" hidden>
@@ -252,7 +319,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
         <span class="splash-card-desc">iOS e iPadOS, no Safari. Campos ajustados para não ampliar a tela ao digitar.</span>
       </button>
     </div>
-    <div class="splash-note">O ambiente pode ser trocado a qualquer momento pelo botão “Ambiente” no cabeçalho.<br>Versão 12 · 05/10/2026</div>
+    <div class="splash-note">O ambiente pode ser trocado a qualquer momento pelo botão “Ambiente” no cabeçalho.<br>Versão 13 · 06/10/2026</div>
   </div>
 </div>
 <div id="aviso" role="status" aria-live="polite"></div>
@@ -263,6 +330,12 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="sub">Método Empírico CBR · IP-06/2004 · DNIT IPR-719 · Manual de Pavimentação DNIT/IPR</div>
   </div>
   <div class="header-right">
+    <span class="sessao-bar" id="sessao-bar" hidden>
+      <span class="quem" id="sessao-quem"></span>
+      <span class="selo" id="sessao-selo" hidden>Admin</span>
+    </span>
+    <button id="btn-usuarios" class="theme-btn" onclick="abrirAdmin()" hidden title="Gerenciar usuários">Usuários</button>
+    <button id="btn-sair" class="theme-btn" onclick="sairDaConta()" hidden title="Encerrar a sessão">Sair</button>
     <button id="device-toggle-btn" class="theme-btn" onclick="abrirSelecaoAmbiente()" style="display:none" title="Trocar o ambiente de uso">Ambiente</button>
     <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro">Tema</button>
   </div>
@@ -272,6 +345,8 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
   <span class="tb-label">Projeto:</span>
   <button class="tb-btn tb-btn-save" onclick="salvarProjeto()" title="Salva os dados do projeto em arquivo .json">Salvar projeto</button>
   <button class="tb-btn" onclick="document.getElementById('imp').click()" title="Abre um projeto salvo (.json)">Abrir projeto</button>
+  <button class="tb-btn tb-nuvem" onclick="salvarNaNuvem()" hidden title="Salva este projeto na nuvem">Salvar na nuvem</button>
+  <button class="tb-btn tb-nuvem" onclick="abrirDaNuvem()" hidden title="Abre um projeto salvo na nuvem">Abrir da nuvem</button>
   <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importarProjeto(event)">
   <span class="tb-sep"></span>
   <span class="tb-label">Exportar memória:</span>
@@ -344,9 +419,9 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     </div>
     <div class="grid3" style="margin-top:10px;">
       <div class="field">
-        <label>Incremento Construtivo (cm)</label>
-        <input type="number" id="incr" value="5" min="1" max="20" step="1" oninput="calc()">
-        <span class="unit">Arredondamento múltiplo (ex.: 5 cm)</span>
+        <label>Incremento das Camadas Granulares (cm)</label>
+        <input type="number" id="incr" value="10" min="1" max="20" step="1" oninput="calc()">
+        <span class="unit">Base, sub-base e reforço em múltiplos deste valor</span>
       </div>
       <div class="field">
         <label>Espessura Mínima Base (cm)</label>
@@ -358,7 +433,27 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
         <input type="number" id="emin_gran" value="15" min="5" max="50" step="1" oninput="calc()">
         <span class="unit">Mínimo construtivo sub-base / reforço</span>
       </div>
+      <div class="field">
+        <label>Espessura Máxima por Camada Compactada (cm)</label>
+        <input type="number" id="e_max_camada" value="10" min="5" max="60" step="1" oninput="calc()">
+        <span class="unit">Define o número de subcamadas de execução</span>
+      </div>
+      <div class="field">
+        <label>Fator de Segurança sobre H₂₀ — inequação [1]</label>
+        <select id="modo_fator" onchange="calc()">
+          <option value="auto">Automático — 1,20 quando N &gt; 10⁷</option>
+          <option value="1">1,00 — sem majoração</option>
+          <option value="0.8">0,80 — sub-base CBR ≥ 40% e N ≤ 10⁶</option>
+        </select>
+        <span class="unit">Majora a proteção exigida da sub-base</span>
+      </div>
     </div>
+    <div class="grid3" style="margin-top:10px;">
+      <div><div class="out-cell"><div class="lbl">Fator aplicado sobre H₂₀</div><div class="val" id="o_fator_h20">—</div></div></div>
+      <div><div class="out-cell"><div class="lbl">H₂₀ exigido na inequação [1] (cm)</div><div class="val" id="o_H20exig">—</div></div></div>
+      <div><div class="out-cell"><div class="lbl">Espessura total física (cm)</div><div class="val" id="o_e_total_show">—</div></div></div>
+    </div>
+    <p id="o_texto_fator" style="font-size:11px;color:var(--fg2);margin-top:8px;"></p>
   </div>
 
   <div class="sec">
@@ -466,25 +561,62 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
       <div><div class="out-cell"><div class="lbl">Espessura equivalente — R·KR + B·KB + h₂₀·KS + hn·KRef (cm)</div><div class="val" id="ef_equiv">—</div></div></div>
       <div><div class="out-cell"><div class="lbl">Situação das três inequações</div><div class="val" id="ef_status">—</div></div></div>
     </div>
+    <div class="val-bar info" id="o_compactacao" style="margin-top:10px;">—</div>
+    <div class="val-bar info" id="o_validacao" style="margin-top:8px;">—</div>
   </div>
 
   <div class="sec">
-    <div class="sec-title">Verificação Altimétrica — Lençol Freático</div>
+    <div class="sec-title">Cálculo Altimétrico do Subleito e do Lençol Freático</div>
     <div class="grid3">
-      <div class="field"><label>Cota RN (m)</label><input type="number" id="a_rn" value="100.00" step="0.01" oninput="calcAlti()"></div>
-      <div class="field"><label>Desnível Greide–RN (m)</label><input type="number" id="a_desnivel" value="0.50" step="0.01" oninput="calcAlti()"></div>
-      <div class="field"><label>Profundidade do NA (m abaixo da boca)</label><input type="number" id="a_na" value="2.00" step="0.01" oninput="calcAlti()"></div>
+      <div class="field">
+        <label>Cota do RN (m)</label>
+        <input type="number" id="a_rn" value="100.00" step="0.001" oninput="calcAlti()">
+        <span class="unit">Referência de nível do levantamento</span>
+      </div>
+      <div class="field">
+        <label>Desnível entre RN e greide acabado (m)</label>
+        <input type="number" id="a_desnivel" value="0.500" step="0.001" oninput="calcAlti()">
+        <span class="unit">Positivo acima do RN, negativo abaixo</span>
+      </div>
+      <div class="field">
+        <label>Desnível entre RN e boca da sondagem (m)</label>
+        <input type="number" id="a_desn_boca" value="0.000" step="0.001" oninput="calcAlti()">
+        <span class="unit">Positivo acima do RN, negativo abaixo</span>
+      </div>
+      <div class="field">
+        <label>Profundidade do nível d'água (m)</label>
+        <input type="number" id="a_na" value="2.500" min="0" step="0.001" oninput="calcAlti()">
+        <span class="unit">Medida a partir da boca da sondagem</span>
+      </div>
+      <div class="field">
+        <label>Afastamento mínimo (m)</label>
+        <input type="number" id="a_afast_min" value="1.500" min="0.001" step="0.001" oninput="calcAlti()">
+        <span class="unit">Afastamento vertical exigido em projeto</span>
+      </div>
+      <div class="field">
+        <label>Espessura total do pavimento (m)</label>
+        <input type="text" id="a_esp_pav" value="—" disabled style="background:var(--out);border-color:var(--out-border);">
+        <span class="unit">Resulta do dimensionamento</span>
+      </div>
     </div>
-    <div class="grid3" style="margin-top:10px;">
-      <div><div class="out-cell"><div class="lbl">Cota Greide Acabado (m)</div><div class="val" id="a_greide">—</div></div></div>
-      <div><div class="out-cell"><div class="lbl">Cota Subleito (m)</div><div class="val" id="a_subleito">—</div></div></div>
-      <div><div class="out-cell"><div class="lbl">Cota Lençol Freático (m)</div><div class="val" id="a_lf">—</div></div></div>
+    <div class="grid4" style="margin-top:10px;">
+      <div><div class="out-cell"><div class="lbl">Cota do greide acabado (m)</div><div class="val" id="a_greide">—</div></div></div>
+      <div><div class="out-cell"><div class="lbl">Cota do subleito crítico (m)</div><div class="val" id="a_subleito">—</div></div></div>
+      <div><div class="out-cell"><div class="lbl">Cota da boca da sondagem (m)</div><div class="val" id="a_boca">—</div></div></div>
+      <div><div class="out-cell"><div class="lbl">Cota do lençol freático (m)</div><div class="val" id="a_lf">—</div></div></div>
     </div>
     <div class="grid2" style="margin-top:10px;">
-      <div><div class="out-cell"><div class="lbl">Afastamento Vertical (m)</div><div class="val" id="a_afastamento">—</div></div></div>
+      <div><div class="out-cell"><div class="lbl">Afastamento vertical (m)</div><div class="val" id="a_afastamento">—</div></div></div>
       <div><div class="out-cell"><div class="lbl">Situação</div><div class="val" id="a_situacao">—</div></div></div>
     </div>
-    <p style="font-size:10px;color:var(--fg3);margin-top:6px;font-style:italic;">Afastamento = Cota Subleito − Cota LF · Situação: ATENDE se afastamento ≥ 0 (subleito acima do NA)</p>
+    <p style="font-size:11px;color:var(--fg2);margin-top:8px;">
+      Cota do greide = RN + desnível do greide · Cota do subleito = greide − espessura total ·
+      Cota da boca = RN + desnível da boca · Cota do lençol = boca − profundidade do N.A. ·
+      Afastamento = cota do subleito − cota do lençol.
+    </p>
+    <p style="font-size:11px;color:var(--fg3);margin-top:4px;font-style:italic;">
+      Confirmar que o N.A. informado representa a condição crítica sazonal e que greide e sondagem usam o mesmo RN.
+    </p>
   </div>
 
   <div class="sec">
@@ -903,6 +1035,213 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
 </div>
 
 <!-- CDN libraries -->
+<script src="firebase-config.js"></script>
+<script type="module">
+/* ============================================================
+   NUVEM — autenticação e armazenamento (Firebase)
+   Carregado como módulo. Publica window.Nuvem para o restante do programa.
+   Sem firebase-config.js válido, o programa segue em modo local.
+   ============================================================ */
+const SDK = 'https://www.gstatic.com/firebasejs/12.19.0/';
+const DOMINIO = '@calcdnit.app';           // usuário "igor" vira "igor@calcdnit.app"
+
+const Nuvem = {
+  disponivel: false,       // SDK carregado e configurado
+  motivo: '',              // por que não está disponível
+  usuario: null,           // {uid, usuario, nome, empresa, admin, ativo, validade}
+  _fb: null,
+  aoMudarSessao: null      // callback definido pelo programa
+};
+window.Nuvem = Nuvem;
+
+function cfgValida(c){
+  return c && typeof c.apiKey === 'string' && c.apiKey.length > 10
+      && !/COLE_AQUI|SUA_CHAVE|xxxx/i.test(c.apiKey)
+      && typeof c.projectId === 'string' && c.projectId.length > 0;
+}
+
+(async function iniciar(){
+  const cfg = window.FIREBASE_CONFIG;
+  if(!cfgValida(cfg)){
+    Nuvem.motivo = 'sem_configuracao';
+    document.dispatchEvent(new CustomEvent('nuvem-pronta'));
+    return;
+  }
+  try{
+    const [{initializeApp}, auth, fs] = await Promise.all([
+      import(SDK+'firebase-app.js'),
+      import(SDK+'firebase-auth.js'),
+      import(SDK+'firebase-firestore.js')
+    ]);
+    const app = initializeApp(cfg);
+    const a = auth.getAuth(app);
+    const d = fs.getFirestore(app);
+    await auth.setPersistence(a, auth.browserLocalPersistence).catch(()=>{});
+    Nuvem._fb = {a, d, auth, fs};
+    Nuvem.disponivel = true;
+
+    auth.onAuthStateChanged(a, async (u)=>{
+      if(!u){ Nuvem.usuario = null; if(Nuvem.aoMudarSessao) Nuvem.aoMudarSessao(null); return; }
+      try{
+        Nuvem.usuario = await carregarPerfil(u);
+      }catch(e){
+        Nuvem.usuario = {uid:u.uid, usuario:nomeDeEmail(u.email), erro:(e&&e.message)||String(e)};
+      }
+      if(Nuvem.aoMudarSessao) Nuvem.aoMudarSessao(Nuvem.usuario);
+    });
+  }catch(e){
+    Nuvem.motivo = 'falha_sdk';
+    Nuvem.detalhe = (e && e.message) || String(e);
+  }
+  document.dispatchEvent(new CustomEvent('nuvem-pronta'));
+})();
+
+function nomeDeEmail(email){ return String(email||'').split('@')[0]; }
+function paraData(v){
+  if(!v) return null;
+  if(typeof v.toDate === 'function') return v.toDate();   // Timestamp do Firestore
+  const d = (v instanceof Date) ? v : new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+function listaAdmins(){ return (window.ADMINS || []).map(x => String(x).toLowerCase()); }
+function emailDeUsuario(u){
+  const t = String(u||'').trim().toLowerCase();
+  return t.includes('@') ? t : t + DOMINIO;
+}
+
+/* Perfil: criado no primeiro acesso, inativo, à espera de liberação do administrador. */
+async function carregarPerfil(u){
+  const {d, fs} = Nuvem._fb;
+  const ref = fs.doc(d, 'usuarios', u.uid);
+  let snap = await fs.getDoc(ref);
+  if(!snap.exists()){
+    await fs.setDoc(ref, {
+      usuario: nomeDeEmail(u.email), email: u.email || '',
+      nome: '', empresa: '', ativo: false, admin: false,
+      validade: null, criadoEm: fs.serverTimestamp()
+    });
+    snap = await fs.getDoc(ref);
+  }
+  const p = snap.data() || {};
+  const venc = paraData(p.validade);
+  // Administrador é reconhecido pelo e-mail, igual às regras do servidor.
+  const ehAdmin = listaAdmins().indexOf(String(u.email||'').toLowerCase()) >= 0 || !!p.admin;
+  return {
+    uid: u.uid, email: u.email || '',
+    usuario: p.usuario || nomeDeEmail(u.email),
+    nome: p.nome || '', empresa: p.empresa || '',
+    admin: ehAdmin, ativo: !!p.ativo, validade: venc,
+    vencida: !!(venc && venc.getTime() < Date.now()),
+    get liberado(){ return this.admin || (this.ativo && !this.vencida); }
+  };
+}
+
+Nuvem.entrar = async function(usuario, senha){
+  if(!Nuvem.disponivel) throw new Error('Nuvem não configurada.');
+  const {a, auth} = Nuvem._fb;
+  try{
+    await auth.signInWithEmailAndPassword(a, emailDeUsuario(usuario), senha);
+  }catch(e){
+    const c = (e && e.code) || '';
+    if(/invalid-credential|wrong-password|user-not-found|invalid-email/.test(c))
+      throw new Error('Usuário ou senha incorretos.');
+    if(/too-many-requests/.test(c))
+      throw new Error('Muitas tentativas. Aguarde alguns minutos e tente de novo.');
+    if(/network/.test(c))
+      throw new Error('Sem conexão com o servidor. Verifique a internet.');
+    if(/operation-not-allowed/.test(c))
+      throw new Error('Login por usuário e senha não está ativado no Firebase.');
+    if(/unauthorized-domain/.test(c))
+      throw new Error('Este endereço não está autorizado no Firebase (Authentication › Settings › Authorized domains).');
+    throw new Error('Não foi possível entrar: ' + (e.message || c));
+  }
+};
+
+Nuvem.sair = async function(){
+  if(!Nuvem.disponivel) return;
+  const {a, auth} = Nuvem._fb;
+  await auth.signOut(a);
+};
+
+Nuvem.trocarSenha = async function(senhaNova){
+  const {a, auth} = Nuvem._fb;
+  if(!a.currentUser) throw new Error('Nenhuma sessão aberta.');
+  if(String(senhaNova).length < 8) throw new Error('A senha deve ter ao menos 8 caracteres.');
+  await auth.updatePassword(a.currentUser, senhaNova);
+};
+
+/* ---------------- Projetos na nuvem ---------------- */
+Nuvem.salvarProjeto = async function(nome, dados, id){
+  const {d, fs} = Nuvem._fb, u = Nuvem.usuario;
+  if(!u || !u.liberado) throw new Error('Acesso não liberado.');
+  const corpo = {
+    uid: u.uid, usuario: u.usuario, nome: String(nome||'Projeto sem nome').slice(0,120),
+    dados: JSON.stringify(dados), atualizadoEm: fs.serverTimestamp()
+  };
+  if(id){
+    await fs.updateDoc(fs.doc(d,'projetos',id), corpo);
+    return id;
+  }
+  corpo.criadoEm = fs.serverTimestamp();
+  const ref = await fs.addDoc(fs.collection(d,'projetos'), corpo);
+  return ref.id;
+};
+
+Nuvem.listarProjetos = async function(todos){
+  const {d, fs} = Nuvem._fb, u = Nuvem.usuario;
+  if(!u || !u.liberado) throw new Error('Acesso não liberado.');
+  const col = fs.collection(d,'projetos');
+  const q = (todos && u.admin) ? fs.query(col, fs.orderBy('atualizadoEm','desc'), fs.limit(200))
+                               : fs.query(col, fs.where('uid','==',u.uid), fs.orderBy('atualizadoEm','desc'), fs.limit(200));
+  const snap = await fs.getDocs(q);
+  return snap.docs.map(x=>{
+    const v = x.data();
+    return {id:x.id, nome:v.nome, usuario:v.usuario,
+            atualizadoEm: v.atualizadoEm && v.atualizadoEm.toDate ? v.atualizadoEm.toDate() : null};
+  });
+};
+
+Nuvem.abrirProjeto = async function(id){
+  const {d, fs} = Nuvem._fb;
+  const snap = await fs.getDoc(fs.doc(d,'projetos',id));
+  if(!snap.exists()) throw new Error('Projeto não encontrado.');
+  const v = snap.data();
+  return {id, nome:v.nome, dados: JSON.parse(v.dados||'{}')};
+};
+
+Nuvem.excluirProjeto = async function(id){
+  const {d, fs} = Nuvem._fb;
+  await fs.deleteDoc(fs.doc(d,'projetos',id));
+};
+
+/* ---------------- Administração ---------------- */
+Nuvem.listarUsuarios = async function(){
+  const {d, fs} = Nuvem._fb, u = Nuvem.usuario;
+  if(!u || !u.admin) throw new Error('Somente administradores.');
+  const snap = await fs.getDocs(fs.query(fs.collection(d,'usuarios'), fs.limit(500)));
+  const admins = listaAdmins();
+  return snap.docs.map(x=>{
+    const v = x.data();
+    const venc = paraData(v.validade);
+    return {uid:x.id, usuario:v.usuario||'', nome:v.nome||'', empresa:v.empresa||'',
+            ativo:!!v.ativo, validade:venc,
+            admin: admins.indexOf(String(v.email||'').toLowerCase()) >= 0 || !!v.admin,
+            vencida: !!(venc && venc.getTime() < Date.now())};
+  }).sort((a,b)=> (a.usuario||'').localeCompare(b.usuario||''));
+};
+
+Nuvem.atualizarUsuario = async function(uid, campos){
+  const {d, fs} = Nuvem._fb, u = Nuvem.usuario;
+  if(!u || !u.admin) throw new Error('Somente administradores.');
+  const corpo = {};
+  if('ativo'    in campos) corpo.ativo   = !!campos.ativo;
+  if('nome'     in campos) corpo.nome    = String(campos.nome||'').slice(0,120);
+  if('empresa'  in campos) corpo.empresa = String(campos.empresa||'').slice(0,120);
+  if('validade' in campos) corpo.validade = campos.validade ? new Date(campos.validade+'T23:59:59') : null;
+  await fs.updateDoc(fs.doc(d,'usuarios',uid), corpo);
+};
+
+</script>
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -1060,16 +1399,36 @@ function H_dnit(N, cbr) {return 77.67 * Math.pow(N, 0.0482) * Math.pow(cbr, -0.5
    [2] R·KR + B·KB + h20·KS ≥ Hn
    [3] R·KR + B·KB + h20·KS + hn·KRef ≥ Hm
    Cada camada é arredondada para cima no incremento construtivo, respeitando a espessura mínima. */
+/* Fator de segurança sobre H20 na inequação [1].
+   Método DNER/DNIT: para N > 10^7 (revestimento de 10,0 cm ou mais),
+   a proteção da sub-base é majorada em 1,20. */
+function fatorH20(N, modo) {
+  if (modo === '1') return 1.0;
+  if (modo === '0.8') return 0.8;
+  return N > 1e7 ? 1.2 : 1.0; // automático
+}
+function textoFatorH20(N, modo) {
+  const f = fatorH20(N, modo);
+  if (modo === '1') return 'Fator 1,00 adotado manualmente (sem majoração).';
+  if (modo === '0.8') return 'Fator 0,80 adotado manualmente — aplicável apenas com sub-base de CBR ≥ 40% e N ≤ 10⁶; confirmar o enquadramento.';
+  return f > 1 ? 'Fator 1,20 aplicado automaticamente: N > 10⁷ (revestimento de 10,0 cm ou mais).' :
+  'Fator 1,00: N ≤ 10⁷, sem majoração da proteção da sub-base.';
+}
+
 function dimensionar(p) {
   const { N, cbr_sub, cbr_ref, cbr_sb, k_ref, k_base, k_sb, k_r, incr, emin_base, emin_gran } = p;
+  const fat = fatorH20(N, p.modoFator);
   const cbr_eff = Math.min(cbr_sb, 20);
   const H20 = H_dnit(N, cbr_eff),Hn = H_dnit(N, cbr_ref),Hm = H_dnit(N, cbr_sub);
+  const H20exig = H20 * fat; // exigência da inequação [1] já majorada
   let emin_ref = 5;
   if (N >= 50e6) emin_ref = 12.5;else if (N >= 10e6) emin_ref = 10;else if (N >= 5e6) emin_ref = 7.5;
-  const e_ref = roundUp(emin_ref, incr);
+  /* Revestimento: espessura da Tabela de N (5,0 / 7,5 / 10,0 / 12,5 cm).
+     Não recebe o incremento das camadas granulares — o CBUQ não é compactado em camadas de solo. */
+  const e_ref = emin_ref;
   const capR = e_ref * k_ref;
   // Base: atende [1] (e também [2] quando não há sub-base)
-  const alvoBase = k_sb > 0 ? H20 : Math.max(H20, Hn);
+  const alvoBase = k_sb > 0 ? H20exig : Math.max(H20exig, Hn);
   const base_teo = k_base > 0 ? (alvoBase - capR) / k_base : 0;
   const e_base = k_base > 0 ? roundUp(Math.max(emin_base, base_teo), incr) : 0;
   const cap1 = capR + e_base * k_base;
@@ -1082,8 +1441,14 @@ function dimensionar(p) {
   const r_teo = k_r > 0 ? (Hm - cap2) / k_r : 0;
   const e_r = k_r > 0 && r_teo > 0.001 ? roundUp(Math.max(emin_gran, r_teo), incr) : 0;
   const cap3 = cap2 + e_r * k_r;
-  return { cbr_eff, H20, Hn, Hm, emin_ref, e_ref, e_base, e_sb, e_r,
+  // Subcamadas de compactação (informativo; não altera o dimensionamento)
+  const emax = p.e_max_camada > 0 ? p.e_max_camada : 10;
+  const sub = (e) => e > 0 ? Math.ceil(e / emax - 1e-9) : 0;
+  const fracionada = (e) => e > 0 && Math.abs(e / emax - Math.round(e / emax)) > 1e-9;
+  return { cbr_eff, H20, Hn, Hm, H20exig, fator_h20: fat, emin_ref, e_ref, e_base, e_sb, e_r,
     e_total: e_ref + e_base + e_sb + e_r, base_teo, sb_teo, r_teo,
+    e_max_camada: emax, n_sub_base: sub(e_base), n_sub_sb: sub(e_sb), n_sub_r: sub(e_r),
+    subcamada_fracionada: [e_base, e_sb, e_r].some(fracionada),
     ineq1_val: cap1, ineq2_val: cap2, ineq3_val: cap3 };
 }
 
@@ -1123,9 +1488,11 @@ function calc() {
   const k_base = v('k_base') || 1.0;
   const k_sb = v('k_sb') || 1.0;
   const k_r = v('k_r') || 1.0;
-  const incr = v('incr') || 5;
+  const incr = v('incr') || 10;
   const emin_base_inp = v('emin_base') || 15;
   const emin_gran_inp = v('emin_gran') || 15;
+  const modoFator = s('modo_fator') || 'auto';
+  const e_max_camada = v('e_max_camada') || 10;
 
   if (!N || N <= 0) {
     const el = document.getElementById('o_N');
@@ -1135,8 +1502,9 @@ function calc() {
 
   // Dimensionamento e verificação das inequações (DNIT IP-06/2004)
   const D = dimensionar({ N, cbr_sub, cbr_ref, cbr_sb, k_ref, k_base, k_sb, k_r, incr,
-    emin_base: emin_base_inp, emin_gran: emin_gran_inp });
-  const { cbr_eff, H20, Hn, Hm, emin_ref, e_ref, e_base, e_sb, e_r, e_total,
+    emin_base: emin_base_inp, emin_gran: emin_gran_inp,
+    modoFator, e_max_camada });
+  const { cbr_eff, H20, Hn, Hm, H20exig, emin_ref, e_ref, e_base, e_sb, e_r, e_total,
     ineq1_val, ineq2_val, ineq3_val } = D;
 
   _R = { N, cbr_sub, cbr_ref, cbr_sb, cbr_base_val, cbr_eff, H20, Hn, Hm, emin_ref,
@@ -1144,6 +1512,9 @@ function calc() {
     ineq1_val, ineq2_val, ineq3_val,
     base_teo: D.base_teo, sb_teo: D.sb_teo, r_teo: D.r_teo,
     emin_base: emin_base_inp, emin_gran: emin_gran_inp,
+    H20exig, fator_h20: D.fator_h20, modoFator, texto_fator: textoFatorH20(N, modoFator),
+    e_max_camada: D.e_max_camada, n_sub_base: D.n_sub_base, n_sub_sb: D.n_sub_sb,
+    n_sub_r: D.n_sub_r, subcamada_fracionada: D.subcamada_fracionada, incr,
     k_ref, k_base, k_sb, k_r };
 
   // Update outputs
@@ -1174,9 +1545,10 @@ function calc() {
   set('ef_sb', ef(e_sb));
   set('ef_r', ef(e_r));
   set('ef_total', fmt(e_total, 1));
+  set('o_e_total_show', fmt(e_total, 1) + ' cm');
   set('ef_equiv', fmt(ineq3_val, 2));
 
-  const ok = ineq1_val >= H20 - 0.001 && ineq2_val >= Hn - 0.001 && ineq3_val >= Hm - 0.001;
+  const ok = ineq1_val >= H20exig - 0.001 && ineq2_val >= Hn - 0.001 && ineq3_val >= Hm - 0.001;
   const ef_status = document.getElementById('ef_status');
   if (ef_status) {
     ef_status.textContent = ok ? 'ATENDE' : 'NÃO ATENDE';
@@ -1191,13 +1563,28 @@ function calc() {
     el.className = 'val-bar ' + (ok ? 'ok' : 'warn');
     el.textContent = `${label}: ${fmt(val)} ≥ ${fmt(req)} cm — ${ok ? 'ATENDE' : 'NÃO ATENDE'}`;
   };
-  ineqBar('ineq1', ineq1_val, H20, '[1] Sobre a sub-base — R·KR + B·KB');
+  ineqBar('ineq1', ineq1_val, H20exig, '[1] Sobre a sub-base — R·KR + B·KB');
   ineqBar('ineq2', ineq2_val, Hn, '[2] Sobre o reforço — R·KR + B·KB + h₂₀·KS');
   ineqBar('ineq3', ineq3_val, Hm, '[3] Sobre o subleito — R·KR + B·KB + h₂₀·KS + hn·KRef');
 
+  // Fator de segurança e subcamadas na tela
+  set('o_fator_h20', fmt(D.fator_h20, 2));
+  set('o_H20exig', fmt(H20exig) + ' cm');
+  const elTxtFator = document.getElementById('o_texto_fator');
+  if (elTxtFator) elTxtFator.textContent = textoFatorH20(N, modoFator);
+  const elComp = document.getElementById('o_compactacao');
+  if (elComp) {
+    const partes = [];
+    if (e_base > 0) partes.push('base ' + fmt(e_base, 1) + ' cm em ' + D.n_sub_base + (D.n_sub_base > 1 ? ' subcamadas' : ' camada'));
+    if (e_sb > 0) partes.push('sub-base ' + fmt(e_sb, 1) + ' cm em ' + D.n_sub_sb + (D.n_sub_sb > 1 ? ' subcamadas' : ' camada'));
+    if (e_r > 0) partes.push('reforço ' + fmt(e_r, 1) + ' cm em ' + D.n_sub_r + (D.n_sub_r > 1 ? ' subcamadas' : ' camada'));
+    elComp.textContent = partes.length ? 'Execução com camada compactada máxima de ' + fmt(D.e_max_camada, 0) + ' cm: ' + partes.join('; ') + '.' : '—';
+    elComp.className = 'val-bar ' + (D.subcamada_fracionada ? 'warn' : 'ok');
+  }
+  atualizarValidacoes();
   // Sensitivity table
   buildSensTable();
-  // Altimetric
+  // Altimétrico (depende da espessura total recém-calculada)
   calcAlti();
   // Also update dim_N_display
   updateNDisplay();
@@ -1214,8 +1601,9 @@ function buildSensTable() {
   tbody.innerHTML = '';
   cbrVals.forEach((cs) => {
     const d = dimensionar({ N: _R.N, cbr_sub: cs, cbr_ref: _R.cbr_ref, cbr_sb: _R.cbr_sb,
-      k_ref: _R.k_ref, k_base: _R.k_base, k_sb: _R.k_sb, k_r: _R.k_r, incr: _R.incr || 5,
-      emin_base: _R.emin_base || 15, emin_gran: _R.emin_gran || 15 });
+      k_ref: _R.k_ref, k_base: _R.k_base, k_sb: _R.k_sb, k_r: _R.k_r, incr: _R.incr || 10,
+      emin_base: _R.emin_base || 15, emin_gran: _R.emin_gran || 15,
+      modoFator: _R.modoFator, e_max_camada: _R.e_max_camada });
     const tr = document.createElement('tr');
     if (Math.abs(cs - _R.cbr_sub) < 0.01) tr.style.fontWeight = '700';
     tr.innerHTML = `<td>${fmt(cs, 1)}%</td><td>${fmt(cs, 1)}</td><td>${fmt(_R.cbr_ref, 1)}</td><td>${fmt(_R.cbr_sb, 1)}</td>` +
@@ -1228,30 +1616,67 @@ function buildSensTable() {
 /* ============================================================
    ALTIMETRIC VERIFICATION
    ============================================================ */
+/* Cálculo altimétrico do subleito e do lençol freático.
+   Desníveis positivos acima do RN; profundidade do N.A. medida da boca da sondagem. */
 function calcAlti() {
-  const cota_rn = v('a_rn');
-  const desnivel = v('a_desnivel');
-  const esp_pav = (_R.e_total || 0) / 100; // em metros
-  const prof_na = v('a_na');
+  const num = (id) => {const el = document.getElementById(id);if (!el) return NaN;
+    const t = String(el.value).trim();return t === '' ? NaN : Number(t);};
+  const cota_rn = num('a_rn');
+  const desn_greide = num('a_desnivel');
+  const desn_boca = num('a_desn_boca');
+  const prof_na = num('a_na');
+  const afast_min = num('a_afast_min');
+  const esp_pav = (_R.e_total || 0) / 100; // metros
 
-  if (!cota_rn) return;
-  const cota_greide = cota_rn - desnivel;
-  const cota_subleito = cota_greide - (_R.e_total || 0) / 100;
-  const cota_boca = cota_greide - esp_pav;
-  const cota_lf = cota_rn - prof_na;
-  const afastamento = cota_subleito - cota_lf;
-  const situacao = afastamento >= 1.5 ? 'ADEQUADO' : afastamento >= 0.5 ? 'VERIFICAR' : 'CRÍTICO';
+  const set = (id, t) => {const el = document.getElementById(id);if (el) el.textContent = t;};
+  const campo = (id, t) => {const el = document.getElementById(id);if (el) el.value = t;};
+  campo('a_esp_pav', _R.e_total ? fmt(esp_pav, 3) + ' m  (' + fmt(_R.e_total, 1) + ' cm)' : '—');
 
-  const set = (id, v) => {const el = document.getElementById(id);if (el) el.textContent = v;};
-  set('a_greide', fmt(cota_greide, 3) + ' m');
-  set('a_subleito', fmt(cota_subleito, 3) + ' m');
-  set('a_lf', fmt(cota_lf, 3) + ' m');
-  set('a_afastamento', fmt(afastamento, 3) + ' m');
+  const faltam = [cota_rn, desn_greide, desn_boca, prof_na].some((x) => !isFinite(x));
+  const cota_greide = isFinite(cota_rn) && isFinite(desn_greide) ? cota_rn + desn_greide : NaN;
+  const cota_subleito = isFinite(cota_greide) ? cota_greide - esp_pav : NaN;
+  const cota_boca = isFinite(cota_rn) && isFinite(desn_boca) ? cota_rn + desn_boca : NaN;
+  const cota_lf = isFinite(cota_boca) && isFinite(prof_na) ? cota_boca - prof_na : NaN;
+  const afastamento = isFinite(cota_subleito) && isFinite(cota_lf) ? cota_subleito - cota_lf : NaN;
+
+  const m = (x) => isFinite(x) ? fmt(x, 3) + ' m' : '—';
+  set('a_greide', m(cota_greide));
+  set('a_subleito', m(cota_subleito));
+  set('a_boca', m(cota_boca));
+  set('a_lf', m(cota_lf));
+  set('a_afastamento', m(afastamento));
+
+  let situacao, classe;
+  if (faltam) {situacao = 'INFORME RN, DESNÍVEIS E PROFUNDIDADE DO N.A.';classe = 'badge-info';} else
+  if (prof_na < 0) {situacao = 'ERRO: PROFUNDIDADE DO N.A. NEGATIVA';classe = 'badge-warn';} else
+  if (!isFinite(afast_min) || afast_min <= 0) {situacao = 'INFORME O AFASTAMENTO MÍNIMO';classe = 'badge-info';} else
+  if (afastamento <= 0) {situacao = 'CRÍTICO: LENÇOL NO OU ACIMA DO SUBLEITO';classe = 'badge-warn';} else
+  if (afastamento < afast_min) {situacao = 'REVISAR: AFASTAMENTO INFERIOR AO MÍNIMO';classe = 'badge-warn';} else
+  {situacao = 'ATENDE AO AFASTAMENTO ADOTADO';classe = 'badge-ok';}
+
   const el_sit = document.getElementById('a_situacao');
-  if (el_sit) {
-    el_sit.textContent = situacao;
-    el_sit.className = 'badge ' + (afastamento >= 1.5 ? 'badge-ok' : afastamento >= 0.5 ? 'badge-info' : 'badge-warn');
-  }
+  if (el_sit) {el_sit.textContent = situacao;el_sit.className = 'badge ' + classe;}
+
+  _R._alti = { cota_rn, desn_greide, desn_boca, prof_na, afast_min, esp_pav,
+    cota_greide, cota_subleito, cota_boca, cota_lf, afastamento, situacao,
+    atende: !faltam && prof_na >= 0 && isFinite(afast_min) && afast_min > 0 && afastamento >= afast_min };
+  atualizarValidacoes();
+}
+
+/* Validação geral das entradas (espelha a planilha de referência) */
+function atualizarValidacoes() {
+  const el = document.getElementById('o_validacao');
+  if (!el) return;
+  const R = _R,A = _R._alti || {};
+  const msgs = [];
+  if (!R.N || R.N <= 0) msgs.push('ERRO: informe um Número N positivo.');
+  if (R.cbr_sub < 2) msgs.push('ALERTA: CBR do subleito inferior a 2% — prever substituição ou tratamento do material.');
+  if ((R.e_r || 0) > 0 && R.cbr_ref <= R.cbr_sub) msgs.push('REVISAR: o CBR do reforço deve superar o CBR do subleito.');
+  if (R.cbr_sb > 20) msgs.push('NOTA: CBR da sub-base acima de 20% — H₂₀ calculado com CBR limitado a 20%, conforme o método.');
+  if (R.subcamada_fracionada) msgs.push('REVISAR: há camada que não fecha um número inteiro de camadas compactadas — ajustar o incremento ou a espessura máxima por camada.');
+  if (A.situacao && !A.atende) msgs.push(A.situacao);
+  el.textContent = msgs.length ? msgs.join('  •  ') : 'Entradas válidas para o cálculo.';
+  el.className = 'val-bar ' + (msgs.some((t) => /^ERRO|^CRÍTICO|^REVISAR/.test(t)) ? 'warn' : msgs.length ? 'info' : 'ok');
 }
 
 /* ============================================================
@@ -1528,15 +1953,29 @@ function updateMemoria() {
 
   <div class="mem-section">
     <h3>8. Verificação das Inequações</h3>
-    <p>[1] Sobre a sub-base: R·KR + B·KB ≥ H₂₀ → ${fmt(R.ineq1_val)} ≥ ${fmt(R.H20)} ${(R.ineq1_val || 0) >= (R.H20 || 0) - 0.001 ? '— ATENDE' : '— NÃO ATENDE'}<br>
+    <p>[1] Sobre a sub-base: R·KR + B·KB ≥ H₂₀×F → ${fmt(R.ineq1_val)} ≥ ${fmt(R.H20exig || R.H20)} ${(R.ineq1_val || 0) >= (R.H20exig || R.H20 || 0) - 0.001 ? '— ATENDE' : '— NÃO ATENDE'}<br>
     [2] Sobre o reforço: R·KR + B·KB + h₂₀·KS ≥ Hn → ${fmt(R.ineq2_val)} ≥ ${fmt(R.Hn)} ${(R.ineq2_val || 0) >= (R.Hn || 0) - 0.001 ? '— ATENDE' : '— NÃO ATENDE'}<br>
     [3] Sobre o subleito: R·KR + B·KB + h₂₀·KS + hn·KRef ≥ Hm → ${fmt(R.ineq3_val)} ≥ ${fmt(R.Hm)} ${(R.ineq3_val || 0) >= (R.Hm || 0) - 0.001 ? '— ATENDE' : '— NÃO ATENDE'}</p>
   </div>
 
   <div class="mem-section">
-    <h3>9. Verificação Altimétrica</h3>
-    <p>Cota RN: ${v('a_rn') ? fmt(v('a_rn'), 3) + ' m' : 'não informada'}<br>
-    Profundidade N.A.: ${v('a_na') ? fmt(v('a_na'), 3) + ' m' : 'não informada'}</p>
+    <h3>9. Cálculo Altimétrico do Subleito e do Lençol Freático</h3>
+    ${(() => {const A = _R._alti || {};const m = (x) => isFinite(x) ? fmt(x, 3) + ' m' : 'não informado';
+    return `<table class="mem-table">
+      <tr><th>Grandeza</th><th>Valor</th></tr>
+      <tr><td>Cota do RN</td><td>${m(A.cota_rn)}</td></tr>
+      <tr><td>Desnível entre RN e greide acabado</td><td>${m(A.desn_greide)}</td></tr>
+      <tr><td>Desnível entre RN e boca da sondagem</td><td>${m(A.desn_boca)}</td></tr>
+      <tr><td>Profundidade do nível d'água (da boca da sondagem)</td><td>${m(A.prof_na)}</td></tr>
+      <tr><td>Espessura total do pavimento</td><td>${m(A.esp_pav)}</td></tr>
+      <tr><td>Cota do greide acabado</td><td>${m(A.cota_greide)}</td></tr>
+      <tr><td>Cota do subleito crítico</td><td>${m(A.cota_subleito)}</td></tr>
+      <tr><td>Cota da boca da sondagem</td><td>${m(A.cota_boca)}</td></tr>
+      <tr><td>Cota do lençol freático</td><td>${m(A.cota_lf)}</td></tr>
+      <tr><td>Afastamento vertical</td><td><strong>${m(A.afastamento)}</strong></td></tr>
+      <tr><td>Afastamento mínimo adotado</td><td>${m(A.afast_min)}</td></tr>
+      <tr><td>Situação</td><td><strong>${A.situacao || '—'}</strong></td></tr>
+      </table>`;})()}
   </div>
 
   <div class="mem-section">
@@ -1601,7 +2040,7 @@ function updateRelatorio() {
   </table>
 
   <h3 style="font-size:13px;font-weight:700;margin:12px 0 4px;color:var(--accent2)">6. Verificação das Inequações</h3>
-  <p>[1] Sobre a sub-base: ${fmt(R.ineq1_val)} ≥ ${fmt(R.H20)} ${(R.ineq1_val || 0) >= (R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'}<br>
+  <p>[1] Sobre a sub-base: ${fmt(R.ineq1_val)} ≥ ${fmt(R.H20exig || R.H20)} ${(R.ineq1_val || 0) >= (R.H20exig || R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'}<br>
   [2] Sobre o reforço: ${fmt(R.ineq2_val)} ≥ ${fmt(R.Hn)} ${(R.ineq2_val || 0) >= (R.Hn || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'}<br>
   [3] Sobre o subleito: ${fmt(R.ineq3_val)} ≥ ${fmt(R.Hm)} ${(R.ineq3_val || 0) >= (R.Hm || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'}</p>
 
@@ -1642,7 +2081,10 @@ function salvarProjeto() {var _document$getElementB19;
       customN: ((_document$getElementB19 = document.getElementById('n_custom')) == null ? void 0 : _document$getElementB19.value) || '' },
     cbr: { cbr_sub: v('cbr_sub'), cbr_ref: v('cbr_ref'), cbr_sb: v('cbr_sb'), cbr_base: v('cbr_base') },
     k: { k_ref: v('k_ref'), k_base: v('k_base'), k_sb: v('k_sb'), k_r: v('k_r') },
-    alti: { a_rn: v('a_rn'), a_desnivel: v('a_desnivel'), a_na: v('a_na') },
+    alti: { a_rn: v('a_rn'), a_desnivel: v('a_desnivel'), a_desn_boca: v('a_desn_boca'),
+      a_na: v('a_na'), a_afast_min: v('a_afast_min') },
+    criterios: { incr: v('incr'), emin_base: v('emin_base'), emin_gran: v('emin_gran'),
+      e_max_camada: v('e_max_camada'), modo_fator: s('modo_fator') },
     corte: { c_largura: v('c_largura'), c_talcorte: v('c_talcorte'),
       c_talaterro: v('c_talaterro'), c_berma: v('c_berma'),
       c_na: v('c_na'), c_rn: v('c_rn') },
@@ -1652,13 +2094,10 @@ function salvarProjeto() {var _document$getElementB19;
   triggerDownload(blob, 'projeto_dnit.json');
 }
 
-function importarProjeto(ev) {
-  const file = ev.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {var _p$topo;
-      const p = JSON.parse(e.target.result);
+/* Aplica um projeto (de arquivo .json ou da nuvem) aos campos da calculadora */
+function aplicarProjeto(p) {
+  {
+    {var _p$topo;
       const set = (id, val) => {const el = document.getElementById(id);if (el) el.value = val || '';};
       if (p.ident) {
         set('logradouro', p.ident.logradouro);
@@ -1667,7 +2106,14 @@ function importarProjeto(ev) {
       }
       if (p.cbr) {set('cbr_sub', p.cbr.cbr_sub);set('cbr_ref', p.cbr.cbr_ref);set('cbr_sb', p.cbr.cbr_sb);if (p.cbr.cbr_base) set('cbr_base', p.cbr.cbr_base);}
       if (p.k) {set('k_ref', p.k.k_ref);set('k_base', p.k.k_base);set('k_sb', p.k.k_sb);set('k_r', p.k.k_r);}
-      if (p.alti) {set('a_rn', p.alti.a_rn || p.alti.cota_rn);set('a_desnivel', p.alti.a_desnivel || p.alti.desnivel);set('a_na', p.alti.a_na || p.alti.prof_na);}
+      if (p.alti) {set('a_rn', p.alti.a_rn || p.alti.cota_rn);set('a_desnivel', p.alti.a_desnivel || p.alti.desnivel);
+        if (p.alti.a_desn_boca !== undefined) set('a_desn_boca', p.alti.a_desn_boca);
+        set('a_na', p.alti.a_na || p.alti.prof_na);
+        if (p.alti.a_afast_min) set('a_afast_min', p.alti.a_afast_min);}
+      if (p.criterios) {const c = p.criterios;
+        if (c.incr) set('incr', c.incr);if (c.emin_base) set('emin_base', c.emin_base);
+        if (c.emin_gran) set('emin_gran', c.emin_gran);if (c.e_max_camada) set('e_max_camada', c.e_max_camada);
+        if (c.modo_fator) {const el = document.getElementById('modo_fator');if (el) el.value = c.modo_fator;}}
       if (p.corte) {set('c_largura', p.corte.c_largura);set('c_talcorte', p.corte.c_talcorte);
         set('c_talaterro', p.corte.c_talaterro);set('c_berma', p.corte.c_berma);}
       if ((_p$topo = p.topo) != null && _p$topo.rows) {
@@ -1682,6 +2128,19 @@ function importarProjeto(ev) {
         selectScenario(selectedScenario);
       }
       calc();
+      calcAlti();
+    }
+  }
+}
+
+function importarProjeto(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      aplicarProjeto(JSON.parse(e.target.result));
+      _projetoNuvemId = null;
       avisar('Projeto aberto: ' + file.name + '.');
     } catch (err) {avisarErro('Erro ao abrir o projeto: ' + err.message);}
   };
@@ -1733,7 +2192,7 @@ function getMemoriaRows() {var _R$_topo, _R$_topo2, _R$_topo3;
   ['Espessura Total (cm):', fmt(R.e_total || 0, 1)],
   ['', ''],
   ['VERIFICAÇÃO DAS INEQUAÇÕES', ''],
-  ['[1] Sobre a sub-base: R·KR + B·KB ≥ H20', fmt(R.ineq1_val) + ' ≥ ' + fmt(R.H20) + ' ' + ((R.ineq1_val || 0) >= (R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE')],
+  ['[1] Sobre a sub-base: R·KR + B·KB ≥ H20×F', fmt(R.ineq1_val) + ' ≥ ' + fmt(R.H20exig || R.H20) + ' ' + ((R.ineq1_val || 0) >= (R.H20exig || R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE')],
   ['[2] Sobre o reforço: + h20·KS ≥ Hn', fmt(R.ineq2_val) + ' ≥ ' + fmt(R.Hn) + ' ' + ((R.ineq2_val || 0) >= (R.Hn || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE')],
   ['[3] Sobre o subleito: + hn·KRef ≥ Hm', fmt(R.ineq3_val) + ' ≥ ' + fmt(R.Hm) + ' ' + ((R.ineq3_val || 0) >= (R.Hm || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE')],
   ['', ''],
@@ -1798,8 +2257,9 @@ function exportarMemoriaWord() {
   const cbrVals = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0];
   const sensRows = cbrVals.map((cs) => {
     const d = dimensionar({ N: R.N, cbr_sub: cs, cbr_ref: R.cbr_ref, cbr_sb: R.cbr_sb,
-      k_ref: R.k_ref, k_base: R.k_base, k_sb: R.k_sb, k_r: R.k_r, incr: R.incr || 5,
-      emin_base: R.emin_base || 15, emin_gran: R.emin_gran || 15 });
+      k_ref: R.k_ref, k_base: R.k_base, k_sb: R.k_sb, k_r: R.k_r, incr: R.incr || 10,
+      emin_base: R.emin_base || 15, emin_gran: R.emin_gran || 15,
+      modoFator: R.modoFator, e_max_camada: R.e_max_camada });
     const isBold = Math.abs(cs - R.cbr_sub) < 0.01;
     return `<tr${isBold ? ' style="font-weight:bold"' : ''}>
       <td>${f1(cs)}%</td><td>${f2(d.Hm)}</td>
@@ -1807,13 +2267,13 @@ function exportarMemoriaWord() {
   }).join('');
 
   /* Ordem das camadas: ordem de execução (subleito → reforço → sub-base → base → revestimento) */
-  const ok1 = (R.ineq1_val || 0) >= (R.H20 || 0) - 0.001;
+  const ok1 = (R.ineq1_val || 0) >= (R.H20exig || R.H20 || 0) - 0.001;
   const ok2 = (R.ineq2_val || 0) >= (R.Hn || 0) - 0.001;
   // CBR mínimo do reforço: inverte H = 77,67·N^0,0482·CBR^-0,598 com H = capacidade acima do reforço
   const cbrMinRef = (R.ineq2_val || 0) > 0 ? Math.pow(77.67 * Math.pow(R.N, 0.0482) / R.ineq2_val, 1 / 0.598) : 0;
   const okRef = (R.cbr_ref || 0) >= cbrMinRef - 0.0005;
   const ok3 = (R.ineq3_val || 0) >= (R.Hm || 0) - 0.001;
-  const mg1 = (R.ineq1_val || 0) - (R.H20 || 0);
+  const mg1 = (R.ineq1_val || 0) - (R.H20exig || R.H20 || 0);
   const mg2 = (R.ineq2_val || 0) - (R.Hn || 0);
   const mg3 = (R.ineq3_val || 0) - (R.Hm || 0);
 
@@ -1886,7 +2346,7 @@ function exportarMemoriaWord() {
   <tr><td>CBR do reforço do subleito</td><td>${f1(R.cbr_ref)}%</td></tr>
   <tr><td>CBR da sub-base</td><td>${f1(R.cbr_sb)}%</td></tr>
   <tr><td>CBR da base (brita)</td><td>${f1(R.cbr_base_val)}%</td></tr>
-  <tr><td>Incremento construtivo</td><td>${R.incr || 5} cm</td></tr>
+  <tr><td>Incremento construtivo</td><td>${R.incr || 10} cm</td></tr>
   <tr><td>Espessura mínima granular</td><td>15 cm</td></tr>
   </table>
 
@@ -1902,6 +2362,7 @@ function exportarMemoriaWord() {
   <p class="formula">H = 77,67 × N<sup>0,0482</sup> × CBR<sup>-0,598</sup> (Fórmula DNIT IP-06/2004)</p>
 
   <h2>5. Espessuras equivalentes necessárias</h2>
+  <p>${R.texto_fator || ''} A exigência da inequação [1] passa a ser H₂₀ × ${fK(R.fator_h20 || 1)} = <b>${f2(R.H20exig || R.H20)} cm</b>.</p>
   <h3>5.1 H₂₀ — proteção da sub-base</h3>
   <p>CBR<sub>eff</sub> = mín(CBR<sub>SB</sub>; 20%) = mín(${f1(R.cbr_sb)}; 20) = <b>${f1(R.cbr_eff)}%</b></p>
   <p class="formula">H₂₀ = 77,67 × (${Nfmt(R.N || 0)})<sup>0,0482</sup> × (${f1(R.cbr_eff)})<sup>-0,598</sup> = <b>${f2(R.H20)} cm</b></p>
@@ -1918,23 +2379,23 @@ function exportarMemoriaWord() {
 
   <h2>7. Dimensionamento das camadas</h2>
   <h3>7.1 Revestimento CBUQ</h3>
-  <p>Espessura mínima por N = ${Nfmt(R.N || 0)}: <b>e<sub>min,REV</sub> = ${f1(R.emin_ref)} cm</b></p>
-  <p class="formula">e<sub>REV</sub> = arredondar_sup(${f1(R.emin_ref)} cm; ${R.incr || 5} cm) = <b>${f1(R.e_ref)} cm</b></p>
+  <p>A espessura do revestimento decorre diretamente da tabela de espessuras mínimas em função de N, sem arredondamento pelo incremento das camadas granulares.</p>
+  <p class="formula">Para N = ${Nfmt(R.N || 0)}: e<sub>REV</sub> = <b>${f1(R.e_ref)} cm</b> de concreto betuminoso usinado a quente</p>
   <h3>7.2 Base</h3>
-  <p>Necessidade H₂₀ restante após revestimento:</p>
-  <p class="formula">e<sub>base</sub> = arredondar_sup(máx(15; (H₂₀ − e<sub>REV</sub>×K<sub>REV</sub>)/K<sub>B</sub>); ${R.incr || 5}) = arredondar_sup(máx(15; (${f2(R.H20)} − ${f1(R.e_ref)}×${fN(R.k_ref)})/${fN(R.k_base)}); ${R.incr || 5}) = <b>${f1(R.e_base)} cm</b></p>
+  <p>A base completa a proteção exigida sobre a sub-base, já considerando o fator de segurança adotado sobre H₂₀.</p>
+  <p class="formula">e<sub>B</sub> = arredondar_sup(máx(${f1(R.emin_base || 15)}; (H₂₀×${fK(R.fator_h20 || 1)} − e<sub>REV</sub>×K<sub>REV</sub>)/K<sub>B</sub>); ${R.incr || 10}) = arredondar_sup(máx(${f1(R.emin_base || 15)}; (${f2(R.H20)}×${fK(R.fator_h20 || 1)} − ${f1(R.e_ref)}×${fK(R.k_ref)})/${fK(R.k_base)}); ${R.incr || 10}) = <b>${f1(R.e_base)} cm</b></p>
   <h3>7.3 Sub-base</h3>
-  ${R.e_sb > 0 ? `<p>A sub-base completa a proteção necessária sobre o reforço (Hn).</p><p class="formula">e<sub>SB</sub> = arredondar_sup(máx(${f1(R.emin_gran || 15)}; (Hn − e<sub>REV</sub>×K<sub>REV</sub> − e<sub>B</sub>×K<sub>B</sub>)/K<sub>SB</sub>); ${R.incr || 5}) = arredondar_sup(máx(${f1(R.emin_gran || 15)}; (${f2(R.Hn)} − ${f1(R.e_ref)}×${fK(R.k_ref)} − ${f1(R.e_base)}×${fK(R.k_base)})/${fK(R.k_sb)}); ${R.incr || 5}) = <b>${f1(R.e_sb)} cm</b></p>` :
+  ${R.e_sb > 0 ? `<p>A sub-base completa a proteção necessária sobre o reforço (Hn).</p><p class="formula">e<sub>SB</sub> = arredondar_sup(máx(${f1(R.emin_gran || 15)}; (Hn − e<sub>REV</sub>×K<sub>REV</sub> − e<sub>B</sub>×K<sub>B</sub>)/K<sub>SB</sub>); ${R.incr || 10}) = arredondar_sup(máx(${f1(R.emin_gran || 15)}; (${f2(R.Hn)} − ${f1(R.e_ref)}×${fK(R.k_ref)} − ${f1(R.e_base)}×${fK(R.k_base)})/${fK(R.k_sb)}); ${R.incr || 10}) = <b>${f1(R.e_sb)} cm</b></p>` :
   '<p>Sub-base não necessária para as condições de projeto — as inequações [1] e [2] são satisfeitas pela estrutura revestimento + base.</p>'}
   <h3>7.4 Reforço do subleito</h3>
-  ${R.e_r > 0 ? `<p>O reforço completa a espessura equivalente necessária para proteger o subleito com CBR = ${f1(R.cbr_sub)}% (Hm).</p><p class="formula">e<sub>R</sub> = arredondar_sup(máx(${f1(R.emin_gran || 15)}; (Hm − e<sub>REV</sub>×K<sub>REV</sub> − e<sub>B</sub>×K<sub>B</sub> − e<sub>SB</sub>×K<sub>SB</sub>)/K<sub>R</sub>); ${R.incr || 5}) = arredondar_sup(máx(${f1(R.emin_gran || 15)}; (${f2(R.Hm)} − ${f1(R.e_ref)}×${fK(R.k_ref)} − ${f1(R.e_base)}×${fK(R.k_base)} − ${f1(R.e_sb)}×${fK(R.k_sb)})/${fK(R.k_r)}); ${R.incr || 5}) = <b>${f1(R.e_r)} cm</b></p>` :
+  ${R.e_r > 0 ? `<p>O reforço completa a espessura equivalente necessária para proteger o subleito com CBR = ${f1(R.cbr_sub)}% (Hm).</p><p class="formula">e<sub>R</sub> = arredondar_sup(máx(${f1(R.emin_gran || 15)}; (Hm − e<sub>REV</sub>×K<sub>REV</sub> − e<sub>B</sub>×K<sub>B</sub> − e<sub>SB</sub>×K<sub>SB</sub>)/K<sub>R</sub>); ${R.incr || 10}) = arredondar_sup(máx(${f1(R.emin_gran || 15)}; (${f2(R.Hm)} − ${f1(R.e_ref)}×${fK(R.k_ref)} − ${f1(R.e_base)}×${fK(R.k_base)} − ${f1(R.e_sb)}×${fK(R.k_sb)})/${fK(R.k_r)}); ${R.incr || 10}) = <b>${f1(R.e_r)} cm</b></p>` :
   '<p>Reforço do subleito não necessário — as camadas acima já atendem à inequação [3].</p>'}
 
   <h2>8. Verificação das inequações</h2>
   <table><tr><th>Verificação</th><th>Cálculo</th><th>Disponível</th><th>Exigido</th><th>Margem</th><th>Situação</th></tr>
-  <tr><td>[1] Sobre a sub-base (H₂₀)</td>
+  <tr><td>[1] Sobre a sub-base (H₂₀ × ${fK(R.fator_h20 || 1)})</td>
       <td>${f1(R.e_ref)}×${fK(R.k_ref)} + ${f1(R.e_base)}×${fK(R.k_base)}</td>
-      <td>${f2(R.ineq1_val)}</td><td>${f2(R.H20)}</td>
+      <td>${f2(R.ineq1_val)}</td><td>${f2(R.H20exig || R.H20)}</td>
       <td class="${ok1 ? 'ok' : 'warn'}">${f2(mg1)}</td>
       <td class="${ok1 ? 'ok' : 'warn'}">${ok1 ? 'ATENDE' : 'NÃO ATENDE'}</td></tr>
   <tr><td>[2] Sobre o reforço (Hn)</td>
@@ -1969,13 +2430,41 @@ function exportarMemoriaWord() {
   <tr><td>Revestimento</td><td>CBUQ (Concreto Betum. Usinado a Quente)</td><td>—</td><td>—</td><td>Conforme Projeto de Mix</td></tr>
   </table>
 
-  <h2>11. Sensibilidade ao CBR do subleito</h2>
+  <h2>11. Execução das camadas granulares</h2>
+  <p>As espessuras de base, sub-base e reforço do subleito foram arredondadas para múltiplos de ${f1(R.incr || 10)} cm, de modo que cada camada seja executada em camadas compactadas inteiras de no máximo ${f1(R.e_max_camada || 10)} cm, conforme a prática de compactação adotada. Com esse critério, a execução fica assim distribuída:</p>
+  <table><tr><th>Camada</th><th>Espessura adotada (cm)</th><th>Subcamadas de compactação</th></tr>
+  <tr><td>Base</td><td>${f1(R.e_base)}</td><td>${R.n_sub_base || 0}</td></tr>
+  ${R.e_sb > 0 ? `<tr><td>Sub-base</td><td>${f1(R.e_sb)}</td><td>${R.n_sub_sb || 0}</td></tr>` : ''}
+  ${R.e_r > 0 ? `<tr><td>Reforço do subleito</td><td>${f1(R.e_r)}</td><td>${R.n_sub_r || 0}</td></tr>` : ''}
+  </table>
+  ${R.subcamada_fracionada ? `<p class="warn">Há camada cuja espessura não corresponde a um número inteiro de camadas compactadas de ${f1(R.e_max_camada || 10)} cm. Ajustar o incremento adotado ou a espessura máxima por camada, refazendo a verificação das inequações.</p>` : `<p>Todas as camadas granulares fecham número inteiro de camadas compactadas de ${f1(R.e_max_camada || 10)} cm.</p>`}
+
+  <h2>12. Cálculo altimétrico do subleito e do lençol freático</h2>
+  ${(() => {const A = _R._alti || {};const m = (x) => isFinite(x) ? f2(x) + ' m' : 'não informado';
+    return `<p>Os desníveis são medidos a partir do RN, positivos acima e negativos abaixo. A profundidade do nível d'água é medida a partir da boca da sondagem.</p>
+    <table><tr><th>Grandeza</th><th>Valor</th></tr>
+    <tr><td>Cota do RN</td><td>${m(A.cota_rn)}</td></tr>
+    <tr><td>Desnível entre RN e greide acabado</td><td>${m(A.desn_greide)}</td></tr>
+    <tr><td>Desnível entre RN e boca da sondagem</td><td>${m(A.desn_boca)}</td></tr>
+    <tr><td>Profundidade do nível d'água</td><td>${m(A.prof_na)}</td></tr>
+    <tr><td>Espessura total do pavimento</td><td>${m(A.esp_pav)}</td></tr>
+    <tr><td>Cota do greide acabado = RN + desnível do greide</td><td>${m(A.cota_greide)}</td></tr>
+    <tr><td>Cota do subleito crítico = greide − espessura total</td><td>${m(A.cota_subleito)}</td></tr>
+    <tr><td>Cota da boca da sondagem = RN + desnível da boca</td><td>${m(A.cota_boca)}</td></tr>
+    <tr><td>Cota do lençol freático = boca − profundidade do N.A.</td><td>${m(A.cota_lf)}</td></tr>
+    <tr><td><b>Afastamento vertical = subleito − lençol</b></td><td><b>${m(A.afastamento)}</b></td></tr>
+    <tr><td>Afastamento mínimo adotado</td><td>${m(A.afast_min)}</td></tr>
+    <tr><td>Situação</td><td class="${A.atende ? 'ok' : 'warn'}"><b>${A.situacao || 'não avaliada'}</b></td></tr>
+    </table>
+    <p>Confirmar que o nível d'água informado representa a condição crítica sazonal e que o greide e a sondagem estão referidos ao mesmo RN.</p>`;})()}
+
+  <h2>13. Sensibilidade ao CBR do subleito</h2>
   <p>H₂₀ = ${f2(R.H20)} cm e Hn = ${f2(R.Hn)} cm independem do CBR do subleito; apenas Hm e o reforço variam.</p>
   <table><tr><th>CBR do subleito</th><th>Hm (cm)</th><th>CBUQ (cm)</th><th>Base (cm)</th><th>Sub-base (cm)</th><th>Reforço (cm)</th><th>Total (cm)</th></tr>
   ${sensRows}
   </table>
 
-  <h2>12. Ensaios e validação</h2>
+  <h2>14. Ensaios e validação</h2>
   <p>Para validação do dimensionamento deverão ser executados, no mínimo, os seguintes ensaios:</p>
   <p>• Ensaio de CBR (NBR 9895) para subleito e materiais de camadas granulares<br>
   • Ensaio de compactação Proctor (NBR 7182) para controle de execução<br>
@@ -1983,15 +2472,15 @@ function exportarMemoriaWord() {
   • Ensaio de Limite de Plasticidade (NBR 7180) para materiais de base<br>
   • Extração de corpos de prova do revestimento CBUQ para controle de dosagem</p>
 
-  <h2>13. Limitações geotécnicas</h2>
+  <h2>15. Limitações geotécnicas</h2>
   <p>O presente dimensionamento está condicionado às seguintes hipóteses e limitações:</p>
   <p>• Os valores de CBR adotados correspondem ao valor característico do trecho homogêneo;<br>
   • O subleito deverá ser compactado a 100% do Proctor Normal até a cota de subleito;<br>
   • A presença de solos expansivos, turfa ou solos colapsíveis deve ser investigada e tratada separadamente;<br>
-  • O dimensionamento não contempla a influência do lençol freático — verificar afastamento mínimo de 1,50 m;<br>
+  • O afastamento do lençol freático foi verificado no item 12 contra o mínimo adotado em projeto;<br>
   • Resultados válidos para as condições de projeto apresentadas; alterações nos dados de entrada implicam novo dimensionamento.</p>
 
-  <h2>14. Conclusão</h2>
+  <h2>16. Conclusão</h2>
   <p>O dimensionamento pelo Método Empírico do CBR (DNIT IP-06/2004) para a via <b>${logr}</b>,
   trecho <b>${trecho_txt}</b>, com N = <b>${Nfmt(R.N || 0)}</b>, resultou na seguinte estrutura de pavimento flexível:</p>
   <p><b>Revestimento CBUQ: ${f1(R.e_ref)} cm</b> | <b>Base: ${f1(R.e_base)} cm</b>${R.e_sb > 0 ? ` | <b>Sub-base: ${f1(R.e_sb)} cm</b>` : ''}${R.e_r > 0 ? ` | <b>Reforço do subleito: ${f1(R.e_r)} cm</b>` : ''} | <b>Espessura Total: ${f1(R.e_total || 0)} cm</b></p>
@@ -2342,7 +2831,7 @@ async function exportarMemoriaPDF() {
   ['Total:', fmt(R.e_total || 0, 1) + ' cm']]
   );
   addSection('6. Verificação das inequações', [
-  ['[1] Sobre a sub-base:', fmt(R.ineq1_val) + ' ≥ ' + fmt(R.H20) + ' — ' + ((R.ineq1_val || 0) >= (R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE')],
+  ['[1] Sobre a sub-base:', fmt(R.ineq1_val) + ' ≥ ' + fmt(R.H20exig || R.H20) + ' — ' + ((R.ineq1_val || 0) >= (R.H20exig || R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE')],
   ['[2] Sobre o reforço:', fmt(R.ineq2_val) + ' ≥ ' + fmt(R.Hn) + ' — ' + ((R.ineq2_val || 0) >= (R.Hn || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE')],
   ['[3] Sobre o subleito:', fmt(R.ineq3_val) + ' ≥ ' + fmt(R.Hm) + ' — ' + ((R.ineq3_val || 0) >= (R.Hm || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE')]]
   );
@@ -2387,7 +2876,7 @@ function exportarTabExcel(tab) {
     ['Reforço do subleito', R.e_r > 0 ? fmt(R.e_r, 1) : '—', fmt(R.k_r, 2)],
     ['Total', fmt(R.e_total || 0, 1), ''],
     ['', ''],
-    ['Inequação [1] sobre a sub-base:', (R.ineq1_val || 0) >= (R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'],
+    ['Inequação [1] sobre a sub-base:', (R.ineq1_val || 0) >= (R.H20exig || R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'],
     ['Inequação [2] sobre o reforço:', (R.ineq2_val || 0) >= (R.Hn || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'],
     ['Inequação [3] sobre o subleito:', (R.ineq3_val || 0) >= (R.Hm || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE']];
 
@@ -2510,7 +2999,7 @@ ${body}</body></html>`;
     <tr><td>Reforço do subleito</td><td>${R.e_r > 0 ? fmt(R.e_r, 1) + ' cm' : '—'}</td><td>${fmt(R.k_r, 2)}</td></tr>
     <tr><td><b>Total</b></td><td><b>${fmt(R.e_total || 0, 1)} cm</b></td><td>—</td></tr></table>
     <h2>Verificação das inequações</h2>
-    <p>[1] Sobre a sub-base: ${fmt(R.ineq1_val)} ≥ ${fmt(R.H20)} → <span class="${(R.ineq1_val || 0) >= (R.H20 || 0) - 0.001 ? 'ok' : 'warn'}">${(R.ineq1_val || 0) >= (R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'}</span><br>
+    <p>[1] Sobre a sub-base: ${fmt(R.ineq1_val)} ≥ ${fmt(R.H20exig || R.H20)} → <span class="${(R.ineq1_val || 0) >= (R.H20exig || R.H20 || 0) - 0.001 ? 'ok' : 'warn'}">${(R.ineq1_val || 0) >= (R.H20exig || R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'}</span><br>
     [2] Sobre o reforço: ${fmt(R.ineq2_val)} ≥ ${fmt(R.Hn)} → <span class="${(R.ineq2_val || 0) >= (R.Hn || 0) - 0.001 ? 'ok' : 'warn'}">${(R.ineq2_val || 0) >= (R.Hn || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'}</span><br>
     [3] Sobre o subleito: ${fmt(R.ineq3_val)} ≥ ${fmt(R.Hm)} → <span class="${(R.ineq3_val || 0) >= (R.Hm || 0) - 0.001 ? 'ok' : 'warn'}">${(R.ineq3_val || 0) >= (R.Hm || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'}</span></p>
     `, 'Dimensionamento — DNIT IP-06/2004');
@@ -2636,7 +3125,7 @@ async function exportarTabPDF(tab) {
     if (R.e_r > 0) addRow('Reforço do subleito:', fmt(R.e_r, 1) + ' cm');
     addRow('Total:', fmt(R.e_total || 0, 1) + ' cm', true);
     addH('Inequações');
-    addRow('[1] Sobre a sub-base:', (R.ineq1_val || 0) >= (R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE');
+    addRow('[1] Sobre a sub-base:', (R.ineq1_val || 0) >= (R.H20exig || R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE');
     addRow('[2] Sobre o reforço:', (R.ineq2_val || 0) >= (R.Hn || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE');
     addRow('[3] Sobre o subleito:', (R.ineq3_val || 0) >= (R.Hm || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE');
     const buf = doc.output('arraybuffer');
@@ -2674,8 +3163,84 @@ async function exportarTabPDF(tab) {
     const buf = doc.output('arraybuffer');
     await triggerDownload(new Blob([buf], { type: 'application/pdf' }), 'topografia_dnit.pdf');
 
+  } else if (tab === 'corte') {
+    addTitle('Seção Transversal — DNIT', hoje);
+    addH('Parâmetros geométricos');
+    addRow('Largura da plataforma:', fmt(v('c_largura'), 2) + ' m');
+    addRow('Talude de corte (H:V):', '1:' + fmt(v('c_talcorte'), 2));
+    addRow('Talude de aterro (H:V):', '1:' + fmt(v('c_talaterro'), 2));
+    addRow('Berma / acostamento:', fmt(v('c_berma'), 2) + ' m');
+    addH('Espessuras das camadas');
+    addRow('Revestimento CBUQ:', fmt(R.e_ref, 1) + ' cm');
+    addRow('Base:', fmt(R.e_base, 1) + ' cm');
+    addRow('Sub-base:', R.e_sb > 0 ? fmt(R.e_sb, 1) + ' cm' : '—');
+    addRow('Reforço do subleito:', R.e_r > 0 ? fmt(R.e_r, 1) + ' cm' : '—');
+    addRow('Total:', fmt(R.e_total || 0, 1) + ' cm', true);
+    const buf = doc.output('arraybuffer');
+    await triggerDownload(new Blob([buf], { type: 'application/pdf' }), 'secao_transversal_dnit.pdf');
+
+  } else if (tab === 'relatorio') {
+    addTitle('Relatório Técnico — DNIT', hoje);
+    addH('Identificação');
+    addRow('Logradouro:', s('logradouro') || '—');
+    addRow('Trecho:', s('trecho') || '—');
+    addRow('Responsável:', s('responsavel') || '—');
+    addH('Tráfego e suporte');
+    addRow('N adotado:', fmtN(R.N || 0));
+    addRow('CBR do subleito:', fmt(R.cbr_sub, 1) + '%');
+    addRow('CBR do reforço:', fmt(R.cbr_ref, 1) + '%');
+    addRow('CBR da sub-base:', fmt(R.cbr_sb, 1) + '%');
+    addRow('CBR da base:', fmt(R.cbr_base_val, 1) + '%');
+    addH('Estrutura adotada');
+    addRow('Revestimento CBUQ:', fmt(R.e_ref, 1) + ' cm');
+    addRow('Base:', fmt(R.e_base, 1) + ' cm');
+    if (R.e_sb > 0) addRow('Sub-base:', fmt(R.e_sb, 1) + ' cm');
+    if (R.e_r > 0) addRow('Reforço do subleito:', fmt(R.e_r, 1) + ' cm');
+    addRow('Total:', fmt(R.e_total || 0, 1) + ' cm', true);
+    addH('Verificação das inequações');
+    addRow('Fator sobre H20:', fmt(R.fator_h20 || 1, 2));
+    addRow('[1] Sobre a sub-base:', fmt(R.ineq1_val) + ' >= ' + fmt(R.H20exig || R.H20) + ' — ' + ((R.ineq1_val || 0) >= (R.H20exig || R.H20 || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'));
+    addRow('[2] Sobre o reforço:', fmt(R.ineq2_val) + ' >= ' + fmt(R.Hn) + ' — ' + ((R.ineq2_val || 0) >= (R.Hn || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'));
+    addRow('[3] Sobre o subleito:', fmt(R.ineq3_val) + ' >= ' + fmt(R.Hm) + ' — ' + ((R.ineq3_val || 0) >= (R.Hm || 0) - 0.001 ? 'ATENDE' : 'NÃO ATENDE'));
+    const A = _R._alti || {};
+    if (isFinite(A.afastamento)) {
+      addH('Altimetria do subleito e do lençol');
+      addRow('Cota do greide acabado:', fmt(A.cota_greide, 3) + ' m');
+      addRow('Cota do subleito crítico:', fmt(A.cota_subleito, 3) + ' m');
+      addRow('Cota da boca da sondagem:', fmt(A.cota_boca, 3) + ' m');
+      addRow('Cota do lençol freático:', fmt(A.cota_lf, 3) + ' m');
+      addRow('Afastamento vertical:', fmt(A.afastamento, 3) + ' m', true);
+      addRow('Afastamento mínimo:', fmt(A.afast_min, 3) + ' m');
+      addRow('Situação:', A.situacao || '—');
+    }
+    const buf = doc.output('arraybuffer');
+    await triggerDownload(new Blob([buf], { type: 'application/pdf' }), 'relatorio_tecnico_dnit.pdf');
+
+  } else if (tab === 'mat') {
+    addTitle('Materiais e Requisitos — DNIT', hoje);
+    addH('Critérios de aceitação');
+    addRow('Subleito:', 'CBR ' + fmt(R.cbr_sub, 1) + '% · expansão <= 2,0%');
+    if (R.e_r > 0) addRow('Reforço do subleito:', 'CBR ' + fmt(R.cbr_ref, 1) + '% · expansão <= 1,0% · IP <= 10');
+    addRow('Sub-base:', 'CBR ' + fmt(R.cbr_sb, 1) + '% · expansão <= 0,5% · IP <= 6');
+    addRow('Base (BGS):', 'CBR ' + fmt(R.cbr_base_val, 1) + '% · expansão <= 0,3% · IP <= 6, LL <= 25%');
+    addRow('Revestimento:', 'CBUQ conforme projeto de mistura');
+    addH('Execução das camadas granulares');
+    addRow('Incremento adotado:', fmt(R.incr || 10, 0) + ' cm');
+    addRow('Camada compactada máxima:', fmt(R.e_max_camada || 10, 0) + ' cm');
+    addRow('Base:', fmt(R.e_base, 1) + ' cm em ' + (R.n_sub_base || 0) + ' camada(s)');
+    if (R.e_sb > 0) addRow('Sub-base:', fmt(R.e_sb, 1) + ' cm em ' + (R.n_sub_sb || 0) + ' camada(s)');
+    if (R.e_r > 0) addRow('Reforço do subleito:', fmt(R.e_r, 1) + ' cm em ' + (R.n_sub_r || 0) + ' camada(s)');
+    addH('Ensaios mínimos');
+    ['CBR (NBR 9895) — subleito e camadas granulares',
+    'Compactação Proctor (NBR 7182) — controle de execução',
+    'Granulometria (NBR 7181) — base e sub-base',
+    'Limite de plasticidade (NBR 7180) — base',
+    'Corpos de prova do CBUQ — controle de dosagem'].forEach((t) => addRow('•', t));
+    const buf = doc.output('arraybuffer');
+    await triggerDownload(new Blob([buf], { type: 'application/pdf' }), 'materiais_dnit.pdf');
+
   } else {
-    // Others: full memory PDF
+    // Aba Memória de Cálculo: o PDF é a própria memória completa
     await exportarMemoriaPDF();
   }
 }
@@ -2775,16 +3340,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Default coefficient values
   const setVal = (id, val) => {const el = document.getElementById(id);if (el && !el.value) el.value = val;};
   setVal('cbr_sub', '2');
-  setVal('cbr_ref', '80');
+  setVal('cbr_ref', '6');
   setVal('cbr_sb', '20');
   setVal('k_ref', '2.0');
   setVal('k_base', '1.0');
-  setVal('k_sb', '0.5');
+  setVal('k_sb', '1.0');
   setVal('k_r', '1.0');
   setVal('c_largura', '7');
   setVal('c_talcorte', '1');
   setVal('c_talaterro', '1.5');
   setVal('c_berma', '1');
+  setVal('cbr_base', '80');
+  setVal('incr', '10');
+  setVal('emin_base', '15');
+  setVal('emin_gran', '15');
+  setVal('e_max_camada', '10');
+  setVal('a_desn_boca', '0.000');
+  setVal('a_afast_min', '1.500');
+  setVal('a_na', '2.500');
 
   // Select scenario 3 (Meio Pesado = index 2) as default
   selectScenario(2);
@@ -2797,15 +3370,251 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial calculation
   calc();
 
-  // Programa iniciado: esconde o aviso e mostra a tela inicial com o aparelho detectado destacado
+  // Programa iniciado: esconde o aviso e decide entre login e tela inicial
   window.__calcIniciada = true;
   const avisoIni = document.getElementById('aviso-inicial');
   if (avisoIni) avisoIni.hidden = true;
-  const splashIni = document.getElementById('splash');
-  if (splashIni) splashIni.hidden = false;
+  _domPronto = true;
+  decidirEntrada();
+});
+
+/* ============================================================
+   LOGIN, SESSÃO E NUVEM
+   ============================================================ */
+let _domPronto = false,_nuvemPronta = false,_sessaoConhecida = false;
+
+function mostrarTelaInicial() {
+  const el = document.getElementById('splash');
+  if (el) {el.hidden = false;el.classList.remove('hiding');}
   const det = marcarAmbienteDetectado();
   const cartao = document.querySelector('.splash-card[data-modo="' + det + '"]');
   if (cartao && det === 'desktop') cartao.focus();
-});</script>
+}
+
+function msgLogin(texto, tipo) {
+  const el = document.getElementById('login-msg');
+  if (!el) return;
+  el.textContent = texto || '';
+  el.className = 'msg' + (texto ? ' ' + (tipo || 'info') : '');
+}
+
+function decidirEntrada() {
+  if (!_domPronto || !_nuvemPronta) return;
+  const login = document.getElementById('login');
+  const N = window.Nuvem;
+
+  // Sem configuração da nuvem: modo local, sem login
+  if (!N || !N.disponivel) {
+    if (login) login.hidden = true;
+    aplicarSessao(null);
+    mostrarTelaInicial();
+    return;
+  }
+  if (!_sessaoConhecida) return; // aguarda o Firebase informar a sessão
+
+  const u = N.usuario;
+  if (!u) {// ninguém logado
+    if (login) login.hidden = false;
+    const campo = document.getElementById('log_usuario');
+    if (campo && _deviceMode === 'desktop') campo.focus();
+    return;
+  }
+  if (!u.liberado) {// logado, mas sem licença válida
+    if (login) login.hidden = false;
+    msgLogin(u.vencida ?
+    'Sua licença venceu em ' + fmtData(u.validade) + '. Procure o administrador para renovar.' :
+    'Cadastro criado. Aguarde a liberação do administrador para usar a calculadora.', 'info');
+    const f = document.getElementById('form-login');
+    if (f) f.hidden = true;
+    return;
+  }
+  if (login) login.hidden = true; // tudo certo
+  const f = document.getElementById('form-login');
+  if (f) f.hidden = false;
+  msgLogin('');
+  mostrarTelaInicial();
+}
+
+function fmtData(d) {
+  if (!d) return '—';
+  const z = (n) => String(n).padStart(2, '0');
+  return z(d.getDate()) + '/' + z(d.getMonth() + 1) + '/' + d.getFullYear();
+}
+
+function aplicarSessao(u) {
+  const mostra = (id, cond) => {const el = document.getElementById(id);if (el) el.hidden = !cond;};
+  document.querySelectorAll('.tb-nuvem').forEach((b) => {b.hidden = !(u && u.liberado);});
+  mostra('sessao-bar', !!u);
+  mostra('btn-sair', !!u);
+  mostra('btn-usuarios', !!(u && u.admin));
+  mostra('sessao-selo', !!(u && u.admin));
+  const quem = document.getElementById('sessao-quem');
+  if (quem) quem.textContent = u ? u.nome || u.usuario : '';
+}
+
+function sairDaConta() {
+  if (!window.Nuvem || !window.Nuvem.disponivel) return;
+  _projetoNuvemId = null;
+  window.Nuvem.sair().then(() => {location.reload();});
+}
+
+document.addEventListener('nuvem-pronta', () => {
+  _nuvemPronta = true;
+  const N = window.Nuvem;
+  if (N && N.disponivel) {
+    N.aoMudarSessao = (u) => {_sessaoConhecida = true;aplicarSessao(u);decidirEntrada();};
+  }
+  decidirEntrada();
+});
+
+document.addEventListener('submit', (ev) => {
+  if (!ev.target || ev.target.id !== 'form-login') return;
+  ev.preventDefault();
+  const btn = document.getElementById('btn-entrar');
+  const usuario = (document.getElementById('log_usuario') || {}).value || '';
+  const senha = (document.getElementById('log_senha') || {}).value || '';
+  if (!usuario.trim() || !senha) {msgLogin('Informe usuário e senha.', 'erro');return;}
+  if (btn) {btn.disabled = true;btn.textContent = 'Entrando…';}
+  msgLogin('');
+  window.Nuvem.entrar(usuario, senha).
+  catch((e) => msgLogin(e && e.message || 'Não foi possível entrar.', 'erro')).
+  then(() => {if (btn) {btn.disabled = false;btn.textContent = 'Entrar';}
+    const sn = document.getElementById('log_senha');if (sn) sn.value = '';});
+});
+
+/* ---------------- Janela auxiliar ---------------- */
+function abrirModal(titulo, sub) {
+  const m = document.getElementById('modal');
+  document.getElementById('modal-titulo').textContent = titulo;
+  document.getElementById('modal-sub').textContent = sub || '';
+  document.getElementById('modal-corpo').innerHTML = '<p style="font-size:13px;color:var(--fg2);margin-top:10px">Carregando…</p>';
+  if (m) m.hidden = false;
+}
+function fecharModal() {const m = document.getElementById('modal');if (m) m.hidden = true;}
+function corpoModal(html) {const c = document.getElementById('modal-corpo');if (c) c.innerHTML = html;}
+
+/* ---------------- Projetos na nuvem ---------------- */
+let _projetoNuvemId = null;
+
+function dadosDoProjeto() {
+  return {
+    v: 3,
+    ident: { logradouro: s('logradouro'), trecho: s('trecho'), responsavel: s('responsavel') },
+    numN: { selectedScenario, N_adotado, customN: (document.getElementById('n_custom') || {}).value || '' },
+    cbr: { cbr_sub: v('cbr_sub'), cbr_ref: v('cbr_ref'), cbr_sb: v('cbr_sb'), cbr_base: v('cbr_base') },
+    k: { k_ref: v('k_ref'), k_base: v('k_base'), k_sb: v('k_sb'), k_r: v('k_r') },
+    criterios: { incr: v('incr'), emin_base: v('emin_base'), emin_gran: v('emin_gran'),
+      e_max_camada: v('e_max_camada'), modo_fator: s('modo_fator') },
+    alti: { a_rn: v('a_rn'), a_desnivel: v('a_desnivel'), a_desn_boca: v('a_desn_boca'),
+      a_na: v('a_na'), a_afast_min: v('a_afast_min') },
+    corte: { c_largura: v('c_largura'), c_talcorte: v('c_talcorte'),
+      c_talaterro: v('c_talaterro'), c_berma: v('c_berma'), c_na: v('c_na'), c_rn: v('c_rn') },
+    topo: { rows: getTopoData() }
+  };
+}
+
+function salvarNaNuvem() {
+  const N = window.Nuvem;
+  if (!N || !N.usuario || !N.usuario.liberado) {avisarErro('Acesso não liberado.');return;}
+  const sugestao = (s('logradouro') || 'Projeto') + (s('trecho') ? ' — ' + s('trecho') : '');
+  abrirModal('Salvar na nuvem', 'O projeto fica guardado no servidor, disponível em qualquer computador.');
+  corpoModal('<div class="field" style="margin-top:10px"><label>Nome do projeto</label>' +
+  '<input type="text" id="nv_nome" value="' + sugestao.replace(/"/g, '&quot;') + '"></div>' +
+  '<button class="tb-btn tb-btn-save" style="margin-top:10px" onclick="confirmarSalvarNuvem()">Salvar</button>' + (
+  _projetoNuvemId ? '<p style="font-size:11.5px;color:var(--fg3);margin-top:8px">Já existe um projeto aberto da nuvem. Salvar vai atualizá-lo.</p>' : ''));
+}
+
+function confirmarSalvarNuvem() {
+  const nome = (document.getElementById('nv_nome') || {}).value || 'Projeto sem nome';
+  corpoModal('<p style="font-size:13px;color:var(--fg2);margin-top:10px">Salvando…</p>');
+  window.Nuvem.salvarProjeto(nome, dadosDoProjeto(), _projetoNuvemId).
+  then((id) => {_projetoNuvemId = id;fecharModal();avisar('Projeto salvo na nuvem: ' + nome + '.');}).
+  catch((e) => corpoModal('<p class="val-bar warn" style="margin-top:10px">' + (e && e.message || e) + '</p>'));
+}
+
+function abrirDaNuvem() {
+  const N = window.Nuvem;
+  if (!N || !N.usuario || !N.usuario.liberado) {avisarErro('Acesso não liberado.');return;}
+  const admin = N.usuario.admin;
+  abrirModal('Projetos na nuvem', admin ? 'Como administrador, você vê os projetos de todos os usuários.' : 'Seus projetos salvos.');
+  N.listarProjetos(admin).then((lista) => {
+    if (!lista.length) {corpoModal('<p style="font-size:13px;color:var(--fg2);margin-top:10px">Nenhum projeto salvo ainda.</p>');return;}
+    let h = '<table class="lista-nuvem"><tr><th>Projeto</th>' + (admin ? '<th>Usuário</th>' : '') + '<th>Atualizado</th><th></th></tr>';
+    lista.forEach((p) => {
+      h += '<tr><td>' + escapar(p.nome) + '</td>' + (
+      admin ? '<td>' + escapar(p.usuario || '') + '</td>' : '') +
+      '<td>' + (p.atualizadoEm ? fmtData(p.atualizadoEm) : '—') + '</td>' +
+      '<td style="white-space:nowrap">' +
+      '<button class="tb-btn" onclick=\"carregarDaNuvem(\'' + p.id + '\')\">Abrir</button> ' +
+      '<button class="btn-rem" onclick=\"excluirDaNuvem(\'' + p.id + '\')\">Excluir</button></td></tr>';
+    });
+    corpoModal(h + '</table>');
+  }).catch((e) => corpoModal('<p class="val-bar warn" style="margin-top:10px">' + (e && e.message || e) + '</p>'));
+}
+
+function escapar(t) {
+  return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').
+  replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function carregarDaNuvem(id) {
+  window.Nuvem.abrirProjeto(id).then((p) => {
+    aplicarProjeto(p.dados);
+    _projetoNuvemId = id;
+    fecharModal();
+    avisar('Projeto aberto da nuvem: ' + p.nome + '.');
+  }).catch((e) => avisarErro(e && e.message || e));
+}
+
+function excluirDaNuvem(id) {
+  corpoModal('<p style="font-size:13px;color:var(--fg2);margin-top:10px">Excluir este projeto? Não dá para desfazer.</p>' +
+  '<button class="btn-rem" style="margin-right:8px" onclick=\"confirmarExcluirNuvem(\'' + id + '\')\">Excluir</button>' +
+  '<button class="tb-btn" onclick="abrirDaNuvem()">Cancelar</button>');
+}
+function confirmarExcluirNuvem(id) {
+  window.Nuvem.excluirProjeto(id).
+  then(() => {if (_projetoNuvemId === id) _projetoNuvemId = null;avisar('Projeto excluído.');abrirDaNuvem();}).
+  catch((e) => corpoModal('<p class="val-bar warn">' + (e && e.message || e) + '</p>'));
+}
+
+/* ---------------- Administração de usuários ---------------- */
+function abrirAdmin() {
+  const N = window.Nuvem;
+  if (!N || !N.usuario || !N.usuario.admin) {avisarErro('Somente administradores.');return;}
+  abrirModal('Usuários', 'Libere o acesso e defina a validade da licença. Sem data, o acesso não expira.');
+  N.listarUsuarios().then((lista) => {
+    if (!lista.length) {corpoModal('<p style="font-size:13px;color:var(--fg2);margin-top:10px">Nenhum usuário cadastrado ainda. Eles aparecem aqui no primeiro login.</p>');return;}
+    let h = '<table class="lista-nuvem"><tr><th>Usuário</th><th>Nome / Empresa</th><th>Validade</th><th>Situação</th><th></th></tr>';
+    lista.forEach((u) => {
+      const sit = u.admin ? 'Administrador' : !u.ativo ? 'Aguardando liberação' : u.vencida ? 'Licença vencida' : 'Ativo';
+      const cor = u.admin ? 'badge-info' : !u.ativo || u.vencida ? 'badge-warn' : 'badge-ok';
+      const dt = u.validade ? u.validade.toISOString().slice(0, 10) : '';
+      h += '<tr><td>' + escapar(u.usuario) + '</td>' +
+      '<td><input type="text" id="an_' + u.uid + '" value="' + escapar(u.nome) + '" placeholder="nome" style="width:110px"> ' +
+      '<input type="text" id="ae_' + u.uid + '" value="' + escapar(u.empresa) + '" placeholder="empresa" style="width:110px"></td>' +
+      '<td><input type="date" id="av_' + u.uid + '" value="' + dt + '"></td>' +
+      '<td><span class="badge ' + cor + '">' + sit + '</span></td>' +
+      '<td style="white-space:nowrap">' + (
+      u.admin ? '' : '<button class="tb-btn" onclick=\"salvarUsuario(\'' + u.uid + '\',' + (u.ativo ? 'false' : 'true') + ')\">' + (
+      u.ativo ? 'Bloquear' : 'Liberar') + '</button> ') +
+      '<button class="tb-btn" onclick=\"salvarUsuario(\'' + u.uid + '\',null)\">Gravar</button></td></tr>';
+    });
+    corpoModal(h + '</table><p style="font-size:11.5px;color:var(--fg3);margin-top:10px">' +
+    'Para criar um usuário novo: console do Firebase › Authentication › Add user, com e-mail no formato <b>usuario@calcdnit.app</b>. ' +
+    'Ele aparece nesta lista depois do primeiro login.</p>');
+  }).catch((e) => corpoModal('<p class="val-bar warn" style="margin-top:10px">' + (e && e.message || e) + '</p>'));
+}
+
+function salvarUsuario(uid, ativo) {
+  const campos = {
+    nome: (document.getElementById('an_' + uid) || {}).value || '',
+    empresa: (document.getElementById('ae_' + uid) || {}).value || '',
+    validade: (document.getElementById('av_' + uid) || {}).value || null
+  };
+  if (ativo !== null) campos.ativo = ativo;
+  window.Nuvem.atualizarUsuario(uid, campos).
+  then(() => {avisar('Usuário atualizado.');abrirAdmin();}).
+  catch((e) => corpoModal('<p class="val-bar warn">' + (e && e.message || e) + '</p>'));
+}</script>
 </body>
 </html>
