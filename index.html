@@ -334,7 +334,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="msg" id="login-msg"></div>
     <div class="rodape">
       Seu cadastro é analisado pelo administrador antes da liberação.<br>
-      Versão 20 · 07/10/2026
+      Versão 21 · 07/10/2026
     </div>
   </div>
 </div>
@@ -772,11 +772,11 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
       <table>
         <thead><tr><th>Número N</th><th>Classificação</th><th>Cenário típico</th><th>Esp. mín. CBUQ (cm)</th></tr></thead>
         <tbody>
-          <tr><td>N &lt; 5 × 10⁵</td><td>Muito Leve / Leve</td><td>Vias locais, passeio</td><td>5,0</td></tr>
-          <tr><td>5 × 10⁵ ≤ N &lt; 5 × 10⁶</td><td>Médio</td><td>Vias coletoras</td><td>5,0</td></tr>
-          <tr><td>5 × 10⁶ ≤ N &lt; 1 × 10⁷</td><td>Médio-Pesado</td><td>Vias estruturais</td><td>7,5</td></tr>
-          <tr><td>1 × 10⁷ ≤ N &lt; 5 × 10⁷</td><td>Pesado</td><td>Corredores urbanos, BRT</td><td>10,0</td></tr>
-          <tr><td>N ≥ 5 × 10⁷</td><td>Muito Pesado</td><td>Rodovias, terminais</td><td>12,5</td></tr>
+          <tr><td>N ≤ 10⁶</td><td>Leve</td><td>Vias locais (tratamento superficial no Manual; aqui adotado 5,0 cm)</td><td>5,0</td></tr>
+          <tr><td>10⁶ &lt; N ≤ 5 × 10⁶</td><td>Médio</td><td>Vias coletoras</td><td>5,0</td></tr>
+          <tr><td>5 × 10⁶ &lt; N ≤ 10⁷</td><td>Médio-Pesado</td><td>Vias estruturais</td><td>7,5</td></tr>
+          <tr><td>10⁷ &lt; N ≤ 5 × 10⁷</td><td>Pesado</td><td>Corredores urbanos, BRT</td><td>10,0</td></tr>
+          <tr><td>N &gt; 5 × 10⁷</td><td>Muito Pesado</td><td>Rodovias, terminais</td><td>12,5</td></tr>
         </tbody>
       </table>
     </div>
@@ -834,7 +834,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div id="corte_info" style="font-size:12px;color:var(--fg2);margin:8px 0 12px;"></div>
     <div id="corte_secoes" class="secoes-grid"></div>
     <p style="font-size:11px;color:var(--fg3);margin-top:10px;">
-      Cores: marrom = terreno natural · laranja = aterro · azul = corte · tracejado azul = formação (subleito).
+      Cada desenho traz a sua legenda de cores (camadas do pavimento, berma, meio-fio, terreno, corte, aterro, formação e N.A.).
       O caimento vem da aba Topografia. A área de corte e de aterro é a da plataforma, igual à tabela de volumes.
     </p>
   </div>
@@ -909,7 +909,9 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
 
     <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
       <button class="btn-add" onclick="addTopoRow()">+ Adicionar Estaca</button>
+      <button class="btn-add" id="btn-meiofio" onclick="abrirMeioFio()">Meio-fio…</button>
       <button class="btn-calc" id="topo_btn_recalc" onclick="recalcTopo(this)">⟳ Recalcular</button>
+      <span id="mf_resumo" style="font-size:11px;color:var(--fg2);align-self:center;"></span>
       <span id="topo_recalc_aviso" style="font-size:11px;color:var(--fg3);align-self:center;"></span>
     </div>
 
@@ -1073,10 +1075,10 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
       <table>
         <thead><tr><th>N (eixos equiv.)</th><th>Esp. mínima CBUQ (cm)</th><th>Classificação</th></tr></thead>
         <tbody>
-          <tr><td>N &lt; 5 × 10⁶</td><td>5,0</td><td>Tráfego leve / médio</td></tr>
-          <tr><td>5 × 10⁶ ≤ N &lt; 10 × 10⁶</td><td>7,5</td><td>Tráfego médio-pesado</td></tr>
-          <tr><td>10 × 10⁶ ≤ N &lt; 50 × 10⁶</td><td>10,0</td><td>Tráfego pesado</td></tr>
-          <tr><td>N ≥ 50 × 10⁶</td><td>12,5</td><td>Tráfego muito pesado</td></tr>
+          <tr><td>N ≤ 5 × 10⁶</td><td>5,0</td><td>Tráfego leve / médio</td></tr>
+          <tr><td>5 × 10⁶ &lt; N ≤ 10 × 10⁶</td><td>7,5</td><td>Tráfego médio-pesado</td></tr>
+          <tr><td>10 × 10⁶ &lt; N ≤ 50 × 10⁶</td><td>10,0</td><td>Tráfego pesado</td></tr>
+          <tr><td>N &gt; 50 × 10⁶</td><td>12,5</td><td>Tráfego muito pesado</td></tr>
         </tbody>
       </table>
     </div>
@@ -1451,11 +1453,11 @@ let N_adotado = 2000000;
 
 function classificaN(n) {
   if (!n || n <= 0) return '—';
-  if (n < 1e6) return 'N < 10⁶';
-  if (n < 5e6) return '10⁶ ≤ N < 5×10⁶';
-  if (n < 1e7) return '5×10⁶ ≤ N < 10⁷';
-  if (n < 5e7) return '10⁷ ≤ N < 5×10⁷';
-  return 'N ≥ 5×10⁷';
+  if (n <= 1e6) return 'N ≤ 10⁶';
+  if (n <= 5e6) return '10⁶ < N ≤ 5×10⁶';
+  if (n <= 1e7) return '5×10⁶ < N ≤ 10⁷';
+  if (n <= 5e7) return '10⁷ < N ≤ 5×10⁷';
+  return 'N > 5×10⁷';
 }
 
 function updateNDisplay() {
@@ -1548,7 +1550,7 @@ function dimensionar(p) {
   const H20 = H_cbr(N, cbr_eff),Hn = H_cbr(N, cbr_ref),Hm = H_cbr(N, cbr_sub);
   const H20exig = H20 * fat; // exigência da inequação [1] já majorada
   let emin_ref = 5;
-  if (N >= 50e6) emin_ref = 12.5;else if (N >= 10e6) emin_ref = 10;else if (N >= 5e6) emin_ref = 7.5;
+  if (N > 5e7) emin_ref = 12.5;else if (N > 1e7) emin_ref = 10;else if (N > 5e6) emin_ref = 7.5; // limites: N ≤ valor (Manual IPR-719)
   /* Revestimento: espessura da Tabela de N (5,0 / 7,5 / 10,0 / 12,5 cm).
      Não recebe o incremento das camadas granulares — o CBUQ não é compactado em camadas de solo. */
   const e_ref = emin_ref;
@@ -1599,7 +1601,7 @@ function showTab(id) {var _document$getElementB5, _document$querySelect;
   if (id === 'mem') updateMemoria();
   if (id === 'relatorio') updateRelatorio();
   if (id === 'corte') updateCorte();
-  if (id === 'topo') {calcTopo();document.getElementById('topo_espessura').textContent = _R.e_total ? fmt(_R.e_total, 1) + ' cm' : '—';}
+  if (id === 'topo') {calcTopo();mfAtualizarResumo();document.getElementById('topo_espessura').textContent = _R.e_total ? fmt(_R.e_total, 1) + ' cm' : '—';}
 }
 
 /* ============================================================
@@ -2088,6 +2090,57 @@ function topoResumo() {
 let _secSel = [];
 let _secUid = 0;
 
+/* ============================================================
+   MEIO-FIO (aba Topografia) — desenhado na Seção Transversal
+   simples: base, altura total e parte aparente (espelho)
+   conjugado: sarjeta (base e altura) + meio-fio (largura e espelho)
+   ============================================================ */
+const MF_PADRAO = { tipo: 'nenhum', base: 15, alt: 30, esp: 15, sbase: 30, salt: 8, larg: 12 };
+let _mf = Object.assign({}, MF_PADRAO);
+function mfTextoCurto(m) {
+  if (!m || m.tipo === 'nenhum') return '';
+  return m.tipo === 'simples' ? 'meio-fio simples ' + fmt(m.base, 0) + '×' + fmt(m.alt, 0) + ' cm' :
+  'meio-fio c/ sarjeta: sarjeta ' + fmt(m.sbase, 0) + '×' + fmt(m.salt, 0) + ' cm, espelho ' + fmt(m.esp, 0) + ' cm';
+}
+function mfAtualizarResumo() {
+  const el = document.getElementById('mf_resumo');if (!el) return;
+  if (_mf.tipo === 'nenhum') {el.textContent = 'Sem meio-fio.';return;}
+  const ext = _R._topo && _R._topo.extensao;
+  el.textContent = mfTextoCurto(_mf) + ' · nos dois lados' + (ext ? ' · ' + fmt(ext * 2, 1) + ' m de meio-fio' : '');
+}
+function abrirMeioFio() {
+  const m = _mf,f = (id, rot, val, dica) => '<div class="field"><label>' + rot + '</label><input type="number" min="0" step="0.5" id="mfi_' + id + '" value="' + val + '"></div>';
+  abrirModal('Meio-fio', 'Escolha o tipo e informe as medidas em centímetros. Vale para os dois lados da pista.');
+  corpoModal('<div class="field" style="margin-top:10px"><label>Tipo de meio-fio</label><select id="mfi_tipo" onchange="mfAlternar()">' +
+  '<option value="nenhum"' + (m.tipo === 'nenhum' ? ' selected' : '') + '>Sem meio-fio</option>' +
+  '<option value="simples"' + (m.tipo === 'simples' ? ' selected' : '') + '>Meio-fio simples</option>' +
+  '<option value="conjugado"' + (m.tipo === 'conjugado' ? ' selected' : '') + '>Meio-fio com sarjeta conjugada</option></select></div>' +
+  '<div id="mfg_simples" class="grid3" style="margin-top:8px">' + f('base', 'Base (cm)', m.base) + f('alt', 'Altura total (cm)', m.alt) + f('esp1', 'Parte aparente / espelho (cm)', m.esp) + '</div>' +
+  '<div id="mfg_conjugado" class="grid3" style="margin-top:8px">' + f('sbase', 'Base da sarjeta (cm)', m.sbase) + f('salt', 'Altura da sarjeta (cm)', m.salt) +
+  f('esp2', 'Altura do espelho do meio-fio (cm)', m.esp) + f('larg', 'Largura do meio-fio (cm)', m.larg) + '</div>' +
+  '<p style="font-size:11.5px;color:var(--fg3);margin-top:8px">O meio-fio fica na borda da plataforma, dentro da largura informada na tabela.</p>' +
+  '<div style="display:flex;gap:8px;margin-top:12px"><button type="button" class="tb-btn" onclick="fecharModal()">Cancelar</button><button type="button" class="tb-btn tb-btn-save" onclick="aplicarMeioFio()">Aplicar</button></div>');
+  mfAlternar();
+}
+function mfAlternar() {
+  const t = (document.getElementById('mfi_tipo') || {}).value;
+  const a = document.getElementById('mfg_simples'),b = document.getElementById('mfg_conjugado');
+  if (a) a.style.display = t === 'simples' ? '' : 'none';
+  if (b) b.style.display = t === 'conjugado' ? '' : 'none';
+}
+function aplicarMeioFio() {
+  const g = (id) => {const n = parseFloat((document.getElementById('mfi_' + id) || {}).value);return isNaN(n) || n < 0 ? 0 : n;};
+  const tipo = document.getElementById('mfi_tipo').value;
+  const n = { tipo: tipo };
+  if (tipo === 'simples') {n.base = g('base');n.alt = g('alt');n.esp = g('esp1');if (!(n.base > 0 && n.alt > 0)) {avisarErro('Informe a base e a altura do meio-fio.');return;}} else
+  if (tipo === 'conjugado') {n.sbase = g('sbase');n.salt = g('salt');n.esp = g('esp2');n.larg = g('larg');if (!(n.sbase > 0 && n.salt > 0 && n.esp > 0 && n.larg > 0)) {avisarErro('Informe base e altura da sarjeta, o espelho e a largura do meio-fio.');return;}}
+  _mf = Object.assign({}, MF_PADRAO, _mf, n);
+  _sujo = true;fecharModal();mfAtualizarResumo();
+  if (document.getElementById('tab-corte') && document.getElementById('tab-corte').classList.contains('active')) updateCorte();
+  avisar(tipo === 'nenhum' ? 'Meio-fio removido.' : 'Meio-fio definido: ' + mfTextoCurto(_mf) + '.');
+}
+
+
 function secaoParams() {
   const eRef = (_R.e_ref || 0) / 100,eBase = (_R.e_base || 0) / 100;
   const eSB = (_R.e_sb || 0) / 100,eR = (_R.e_r || 0) / 100;
@@ -2098,7 +2151,8 @@ function secaoParams() {
     camadas: [['CBUQ', eRef, '#2b2b2b'], ['Base', eBase, '#c49a3a'],
     ['Sub-base', eSB, '#e2c477'], ['Reforço', eR, '#dcc9a2']].filter((c) => c[1] > 0),
     eTot: (_R.e_total || 0) / 100,
-    ev: v('c_ev') || 1
+    ev: v('c_ev') || 1,
+    mf: _mf && _mf.tipo !== 'nenhum' ? _mf : null
   };
 }
 
@@ -2132,7 +2186,19 @@ function secaoSVG(L, G, P, papel) {
   const temNA = L.na !== null && L.na > 0;
   const naVisivel = temNA && L.na > ymin - 4;
   if (naVisivel) ymin = Math.min(ymin, L.na - 0.3);
-  const W = 640,padX = 86,top = 52,bot = 82;
+  const W = 640,padX = 86,top = 62;
+  let bot = 82;
+  // legenda (cores do desenho)
+  const leg = [];
+  P.camadas.forEach((c) => leg.push([c[2], c[0] === 'CBUQ' ? 'Revestimento (CBUQ)' : c[0] === 'Reforço' ? 'Reforço do subleito' : c[0], 'q']));
+  if (P.berma > 0 && P.berma < b) leg.push(['#8c8c8c', 'Berma', 'l']);
+  if (P.mf) {leg.push(['#b8bcc4', P.mf.tipo === 'conjugado' ? 'Meio-fio' : 'Meio-fio simples', 'q']);if (P.mf.tipo === 'conjugado') leg.push(['#d5d8de', 'Sarjeta', 'q']);}
+  leg.push(['#6b4a1e', 'Terreno natural (perfil)', 'l'], ['#a98a5a', 'Solo natural', 'q'], ['#e08a4a', 'Aterro', 'q'], ['#4a90d9', 'Corte', 'q'], [C.acc, 'Formação (subleito)', 'd']);
+  if (L.na !== null && L.na > 0) leg.push(['#2f7fd1', 'Nível d\'água (N.A.)', 'd']);
+  const legPos = [];let lx = 8,lrow = 0;
+  leg.forEach((it) => {const w = 30 + it[1].length * 5.3 + 12;if (lx + w > W - 8 && lx > 8) {lx = 8;lrow++;}legPos.push([lx, lrow]);lx += w;});
+  const legH = (lrow + 1) * 17 + 8;
+  bot += legH;
   const sc = Math.min((W - 2 * padX) / (xr - xl), 60);
   const scv = Math.min(sc * P.ev, 340 / (ymax - ymin));
   const ox = (W - (xr - xl) * sc) / 2;
@@ -2143,6 +2209,32 @@ function secaoSVG(L, G, P, papel) {
   const sg = (x) => (x > 0 ? '+' : '') + fmt(x, 2);
   const halo = `paint-order="stroke" stroke="${C.bg}" stroke-width="3" stroke-linejoin="round"`;
   const ysE = L.gr - b * P.cEsq,ysD = L.gr - b * P.cDir;
+  // rótulos com anti-sobreposição: cada texto procura a posição livre mais próxima
+  const rots = [];
+  const rot = (prio, txt, x, y, size, anchor, fill, bold, dir) => rots.push({ prio, txt, x, y, size, anchor, fill, bold, dir });
+  const flushRots = () => {
+    const caixas = [[0, 0, W, 46]]; // faixa do cabeçalho
+    let out = '';
+    rots.sort((a, b2) => a.prio - b2.prio).forEach((r) => {
+      const w = r.txt.length * r.size * (r.bold ? 0.6 : 0.54),h = r.size + 2;
+      const x0 = (a) => a === 'end' ? r.x - w : a === 'middle' ? r.x - w / 2 : r.x;
+      let bx = x0(r.anchor),best = null;
+      const passos = [0, 1, -1, 2, -2, 3, -3, 4, -4].map((k) => k * r.dir * -1 * (h + 1));
+      const hs = [0, w * 0.6, -w * 0.6, w * 1.2, -w * 1.2];
+      for (const dx of hs) {
+        for (const dy of passos) {
+          let px = bx + dx;px = Math.max(4, Math.min(W - 4 - w, px));
+          const py = r.y + dy,cx = [px, py - r.size, px + w, py + 3];
+          if (!caixas.some((c) => cx[0] < c[2] && cx[2] > c[0] && cx[1] < c[3] && cx[3] > c[1])) {best = { px, py, cx };break;}
+        }
+        if (best) break;
+      }
+      if (!best) {const px = Math.max(4, Math.min(W - 4 - w, bx));best = { px, py: r.y, cx: [px, r.y - r.size, px + w, r.y + 3] };}
+      caixas.push(best.cx);
+      out += `<text x="${(best.px + (r.anchor === 'end' ? w : r.anchor === 'middle' ? w / 2 : 0)).toFixed(1)}" y="${best.py.toFixed(1)}" font-size="${r.size}"${r.bold ? ' font-weight="700"' : ''} text-anchor="${r.anchor}" fill="${r.fill}" ${halo}>${r.txt}</text>`;
+    });
+    return out;
+  };
 
   // Perfil de projeto (para pintar aterro e corte)
   const perfil = [[xl, G.E.yInt], [-b, G.E.y0]];
@@ -2161,8 +2253,8 @@ function secaoSVG(L, G, P, papel) {
   s += `<polygon points="${pts(perfil.concat([[xr, ymax], [xl, ymax]]))}" fill="#4a90d9" fill-opacity=".22" clip-path="url(#${uid})"/>`;
   // N.A.
   if (naVisivel) {
-    s += `<line x1="${X(xl)}" y1="${Y(L.na)}" x2="${X(xr)}" y2="${Y(L.na)}" stroke="#2f7fd1" stroke-width="1.5" stroke-dasharray="7 4"/>` +
-    `<text x="${X(xl) + 4}" y="${Y(L.na) - 5}" font-size="11" fill="#2f7fd1" ${halo}>N.A. ${f3(L.na)}</text>`;
+    s += `<line x1="${X(xl)}" y1="${Y(L.na)}" x2="${X(xr)}" y2="${Y(L.na)}" stroke="#2f7fd1" stroke-width="1.5" stroke-dasharray="7 4"/>`;
+    rot(7, 'N.A. ' + f3(L.na), X(xl) + 4, Y(L.na) - 5, 11, 'start', '#2f7fd1', false, -1);
   } else if (temNA) {
     s += `<text x="${X(xl) + 4}" y="${H - 66}" font-size="10.5" fill="#2f7fd1">N.A. na cota ${f3(L.na)} (abaixo do quadro)</text>`;
   }
@@ -2177,24 +2269,44 @@ function secaoSVG(L, G, P, papel) {
     s += `<polyline points="${pts([[-b, ysE], [-b + P.berma, L.gr - (b - P.berma) * P.cEsq]])}" fill="none" stroke="#8c8c8c" stroke-width="4"/>` +
     `<polyline points="${pts([[b - P.berma, L.gr - (b - P.berma) * P.cDir], [b, ysD]])}" fill="none" stroke="#8c8c8c" stroke-width="4"/>`;
   }
+  // meio-fio e sarjeta
+  if (P.mf) {
+    const m = P.mf,cm = (x) => (x || 0) / 100;
+    [[-1, ysE], [1, ysD]].forEach(([sn, yS]) => {
+      const R_ = (xa, xb, ya, yb2, cor) => {// retângulo em coordenadas de projeto
+        s += `<polygon points="${pts([[xa, ya], [xb, ya], [xb, yb2], [xa, yb2]])}" fill="${cor}" stroke="#6b7280" stroke-width=".8"/>`;
+      };
+      const ext = sn * b;
+      if (m.tipo === 'simples') {
+        const w = cm(m.base),h = cm(m.alt),e = Math.min(cm(m.esp), h);
+        R_(ext - sn * w, ext, yS + e, yS + e - h, '#b8bcc4');
+      } else {
+        const w = cm(m.larg),sw = cm(m.sbase),sh = cm(m.salt),e = cm(m.esp);
+        R_(ext - sn * (w + sw), ext - sn * w, yS, yS - sh, '#d5d8de');
+        R_(ext - sn * w, ext, yS + e, yS - sh, '#b8bcc4');
+      }
+    });
+  }
   // formação
   s += `<line x1="${X(-b)}" y1="${Y(G.form - b * P.cEsq)}" x2="${X(b)}" y2="${Y(G.form - b * P.cDir)}" stroke="${C.acc}" stroke-width="1" stroke-dasharray="4 3"/>`;
   // taludes
   [[G.E, -1], [G.D, 1]].forEach(([Ld, sn]) => {
     const x1 = sn * b,x2 = sn * (b + Ld.d);
     s += `<line x1="${X(x1)}" y1="${Y(Ld.y0)}" x2="${X(x2)}" y2="${Y(Ld.yInt)}" stroke="${C.fg2}" stroke-width="1.8"${Ld.semInt ? ' stroke-dasharray="5 3"' : ''}/>`;
-    s += `<text x="${X((x1 + x2) / 2)}" y="${Y((Ld.y0 + Ld.yInt) / 2) + (Ld.corte ? -7 : 14)}" font-size="10.5" text-anchor="middle" fill="${C.fg2}" ${halo}>${fmt(Ld.tal, 2)}:1${Ld.semInt ? ' (sem encontro)' : ''}</text>`;
+    rot(6, fmt(Ld.tal, 2) + ':1' + (Ld.semInt ? ' (sem encontro)' : ''), X((x1 + x2) / 2), Y((Ld.y0 + Ld.yInt) / 2) + (Ld.corte ? -7 : 14), 10.5, 'middle', C.fg2, false, Ld.corte ? -1 : 1);
   });
   // terreno natural
   s += `<polyline points="${pts(terreno)}" fill="none" stroke="#6b4a1e" stroke-width="2.2" stroke-linejoin="round"/>`;
   [[-b, G.tE, 'Esq.'], [0, G.tC, 'Eixo'], [b, G.tD, 'Dir.']].forEach(([x, y, nome]) => {
-    s += `<circle cx="${X(x)}" cy="${Y(y)}" r="3" fill="#6b4a1e"/>` +
-    `<text x="${X(x) + (x < 0 ? -9 : x > 0 ? 9 : 0)}" y="${Y(y) + (x === 0 && y < L.gr ? 16 : -8)}" font-size="10.5" text-anchor="${x < 0 ? 'end' : x > 0 ? 'start' : 'middle'}" fill="${C.fg}" ${halo}>${nome} ${f3(y)}</text>`;
+    s += `<circle cx="${X(x)}" cy="${Y(y)}" r="3" fill="#6b4a1e"/>`;
+    rot(x === 0 ? 3 : 2, nome + ' ' + f3(y), X(x) + (x < 0 ? -9 : x > 0 ? 9 : 0), Y(y) + (x === 0 && y < L.gr ? 16 : -8), 10.5, x < 0 ? 'end' : x > 0 ? 'start' : 'middle', C.fg, false, x === 0 && y < L.gr ? 1 : -1);
   });
   // greide
-  s += `<line x1="${X(0)}" y1="${Y(L.gr)}" x2="${X(0)}" y2="${Y(L.gr) - 14}" stroke="${C.fg}" stroke-width="1"/>` +
-  `<text x="${X(0)}" y="${Y(L.gr) - 18}" font-size="11" font-weight="700" text-anchor="middle" fill="${C.fg}" ${halo}>Greide ${f3(L.gr)}</text>` +
-  `<text x="${X(0)}" y="${Y(G.form) + 13}" font-size="10" text-anchor="middle" fill="${C.acc}" ${halo}>Formação ${f3(G.form)}</text>`;
+  s += `<line x1="${X(0)}" y1="${Y(L.gr)}" x2="${X(0)}" y2="${Y(L.gr) - 14}" stroke="${C.fg}" stroke-width="1"/>`;
+
+  rot(1, 'Greide ' + f3(L.gr), X(0), Y(L.gr) - 18, 11, 'middle', C.fg, true, -1);
+  rot(4, 'Formação ' + f3(G.form), X(0), Y(G.form) + 13, 10, 'middle', C.acc, false, 1);
+  s += flushRots();
   // cabeçalho
   const sit = L.sit && L.sit !== '—' ? L.sit : '';
   s += `<text x="8" y="18" font-size="14" font-weight="700" fill="${C.fg}">Estaca ${String(L.est).replace('.', ',')}${sit ? ' — ' + sit : ''}</text>` +
@@ -2206,10 +2318,19 @@ function secaoSVG(L, G, P, papel) {
   `<line x1="${X(-b)}" y1="${yb - 4}" x2="${X(-b)}" y2="${yb + 4}" stroke="${C.fg2}"/><line x1="${X(b)}" y1="${yb - 4}" x2="${X(b)}" y2="${yb + 4}" stroke="${C.fg2}"/>` +
   `<text x="${X(0)}" y="${yb + 15}" font-size="11.5" font-weight="700" text-anchor="middle" fill="${C.fg}">Plataforma ${f2(L.larg)} m</text>`;
   const pista = L.larg - 2 * P.berma;
+  const mfTxt = P.mf ? ' · ' + mfTextoCurto(P.mf) : '';
   const geo = P.berma > 0 && pista > 0 ? `pista ${f2(pista)} m + 2 bermas de ${f2(P.berma)} m · ` : '';
   const camTxt = P.camadas.map((c) => c[0] + ' ' + fmt(c[1] * 100, 1)).join(' · ');
-  s += `<text x="${W / 2}" y="${yb + 30}" font-size="10" text-anchor="middle" fill="${C.fg3}">${geo}caimento ${fmt(P.cEsq * 100, 1)}% / ${fmt(P.cDir * 100, 1)}%</text>` +
+  s += `<text x="${W / 2}" y="${yb + 30}" font-size="10" text-anchor="middle" fill="${C.fg3}">${geo}caimento ${fmt(P.cEsq * 100, 1)}% / ${fmt(P.cDir * 100, 1)}%${mfTxt}</text>` +
   `<text x="${W / 2}" y="${yb + 44}" font-size="10" text-anchor="middle" fill="${C.fg3}">${camTxt} cm (total ${fmt(P.eTot * 100, 1)} cm)${P.ev !== 1 ? ' · escala vertical ×' + P.ev : ''}</text>`;
+  // legenda
+  const ly0 = H - legH + 6;
+  leg.forEach((it, i) => {
+    const [px, row] = legPos[i],py = ly0 + row * 17;
+    if (it[2] === 'q') s += `<rect x="${px}" y="${py}" width="16" height="10" fill="${it[0]}"${it[0] === '#4a90d9' ? ' fill-opacity=".35"' : it[0] === '#e08a4a' || it[0] === '#a98a5a' ? ' fill-opacity=".6"' : ''} stroke="#6b7280" stroke-width=".6"/>`;else
+    s += `<line x1="${px}" y1="${py + 5}" x2="${px + 16}" y2="${py + 5}" stroke="${it[0]}" stroke-width="${it[2] === 'l' ? 3 : 1.5}"${it[2] === 'd' ? ' stroke-dasharray="4 3"' : ''}/>`;
+    s += `<text x="${px + 21}" y="${py + 9}" font-size="10" fill="${C.fg2}">${it[1]}</text>`;
+  });
   s += '</svg>';
   return { svg: s, W: W, H: H };
 }
@@ -2522,7 +2643,8 @@ function salvarProjeto() {var _document$getElementB7;
     corte: { c_talcorte: v('c_talcorte'),
       c_talaterro: v('c_talaterro'), c_berma: v('c_berma'),
       c_na: v('c_na'), c_rn: v('c_rn') },
-    topo: { topo_rn: v('topo_rn'), topo_na: v('topo_na'), rows: getTopoData() }
+    topo: { topo_rn: v('topo_rn'), topo_na: v('topo_na'), rows: getTopoData() },
+    meiofio: Object.assign({}, _mf)
   };
   const blob = new Blob([JSON.stringify(proj, null, 2)], { type: 'application/json' });
   triggerDownload(blob, 'pavimento_projeto.json');
@@ -2562,6 +2684,7 @@ function aplicarProjeto(p) {
         if (p.numN.customN) set('n_custom', p.numN.customN);
         selectScenario(selectedScenario);
       }
+      _mf = Object.assign({}, MF_PADRAO, p.meiofio || {});mfAtualizarResumo();
       calc();
       calcAlti();
     }
@@ -4441,7 +4564,8 @@ function dadosDoProjeto() {
       a_na: v('a_na'), a_afast_min: v('a_afast_min') },
     corte: { c_talcorte: v('c_talcorte'),
       c_talaterro: v('c_talaterro'), c_berma: v('c_berma'), c_na: v('c_na'), c_rn: v('c_rn') },
-    topo: { rows: getTopoData() }
+    topo: { rows: getTopoData() },
+    meiofio: Object.assign({}, _mf)
   };
 }
 
