@@ -334,7 +334,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="msg" id="login-msg"></div>
     <div class="rodape">
       Seu cadastro é analisado pelo administrador antes da liberação.<br>
-      Versão 21 · 07/10/2026
+      Versão 22 · 07/10/2026
     </div>
   </div>
 </div>
@@ -835,7 +835,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div id="corte_secoes" class="secoes-grid"></div>
     <p style="font-size:11px;color:var(--fg3);margin-top:10px;">
       Cada desenho traz a sua legenda de cores (camadas do pavimento, berma, meio-fio, terreno, corte, aterro, formação e N.A.).
-      O caimento vem da aba Topografia. A área de corte e de aterro é a da plataforma, igual à tabela de volumes.
+      O caimento e o meio-fio vêm da aba Topografia. As áreas de corte, aterro e reaterro incluem a plataforma e os taludes, e são as mesmas usadas na tabela de volumes.
     </p>
   </div>
 
@@ -843,7 +843,8 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="sec-title">Padrões para Todas as Estacas</div>
     <div class="grid3">
       <div class="field"><label>Inclinação Talude de Corte (H:V)</label>
-        <select id="c_talcorte" onchange="updateCorte()">
+        <select id="c_talcorte" onchange="calcTopo()">
+          <option value="0">Vertical (corte reto)</option>
           <option value="0.5">0,5:1 (rocha)</option>
           <option value="1">1:1</option>
           <option value="1.5" selected>1,5:1</option>
@@ -851,7 +852,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
         </select>
       </div>
       <div class="field"><label>Inclinação Talude de Aterro (H:V)</label>
-        <select id="c_talaterro" onchange="updateCorte()">
+        <select id="c_talaterro" onchange="calcTopo()">
           <option value="1">1:1</option>
           <option value="1.5" selected>1,5:1</option>
           <option value="2">2:1</option>
@@ -931,6 +932,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
           <th>Δ Trecho (m)</th>
           <th>Corte (m³)</th>
           <th>Aterro (m³)</th>
+          <th>Reaterro (m³)</th>
           <th>CBUQ (m³)</th>
           <th>Base (m³)</th>
           <th>Sub-base (m³)</th>
@@ -957,7 +959,8 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
         <div><div class="out-cell"><div class="lbl">Volume Base (m³)</div><div class="val" id="topo_vol_base">—</div></div></div>
         <div><div class="out-cell"><div class="lbl">Volume Sub-base (m³)</div><div class="val" id="topo_vol_sb">—</div></div></div>
       </div>
-      <div class="grid2" style="margin-top:10px;">
+      <div class="grid3" style="margin-top:10px;">
+        <div><div class="out-cell"><div class="lbl">Reaterro Lateral (m³)</div><div class="val" id="topo_vol_reaterro">—</div></div></div>
         <div><div class="out-cell"><div class="lbl">Volume Reforço Subleito (m³)</div><div class="val" id="topo_vol_ref">—</div></div></div>
         <div><div class="out-cell"><div class="lbl">Status Geral</div><div class="val" id="topo_status">—</div></div></div>
       </div>
@@ -1860,7 +1863,7 @@ function addTopoRow(data) {
   inp('larg', d.larg, '0.1') +
   inp('na', d.na, '0.001') +
   out('form') + out('ac') + out('aa') + out('dl') +
-  out('vc') + out('va') + out('vcb') + out('vbs') + out('vsb') + out('vrf') +
+  out('vc') + out('va') + out('vr') + out('vcb') + out('vbs') + out('vsb') + out('vrf') +
   out('afna') + out('sit') +
   `<td><button class="btn-rem" onclick="remTopoRow(${i})" title="Remover estaca" aria-label="Remover estaca">✕</button></td>`;
   tbody.appendChild(tr);
@@ -1908,12 +1911,13 @@ function calcTopo() {
     };
     return { i: i, est: n('est') || 0, te: n('te'), tc: n('tc'), td: n('td'),
       gr: n('gr'), larg: n('larg') || 0, na: n('na'),
-      form: null, ac: 0, aa: 0, dl: null, vc: null, va: null,
+      form: null, ac: 0, aa: 0, ar: 0, dl: null, vc: null, va: null, vr: null,
       apav: 0, vcb: null, vbs: null, vsb: null, vrf: null,
       afna: null, sit: '—', naCritico: false };
   });
 
   // Geometria de cada seção.
+  const Pp = secaoParams();
   linhas.forEach((L) => {
     if (L.gr === null) {return;}
     L.form = L.gr - eTot; // cota de formação no eixo
@@ -1926,13 +1930,9 @@ function calcTopo() {
     const tE = L.te === null ? tC : L.te;
     const tD = L.td === null ? tC : L.td;
     const b = L.larg / 2;
-    const hE = tE - (L.form - b * cEsq); // altura na borda esquerda
-    const hC = tC - L.form; // altura no eixo
-    const hD = tD - (L.form - b * cDir); // altura na borda direita
-    const e1 = areaTrecho(hE, hC, b);
-    const e2 = areaTrecho(hC, hD, b);
-    L.ac = e1.c + e2.c;
-    L.aa = e1.a + e2.a;
+    const G = secaoGeom(L, Pp); // mesma geometria da Seção Transversal
+    const A = secaoAreas(L, G, Pp); // plataforma + taludes + reaterro
+    L.ac = A.ac;L.aa = A.aa;L.ar = A.ar;
     L.sit = L.ac > 0.005 && L.aa > 0.005 ? 'Misto' :
     L.ac > 0.005 ? 'Corte' : L.aa > 0.005 ? 'Aterro' : 'Nulo';
   });
@@ -1944,6 +1944,7 @@ function calcTopo() {
     A.dl = d > 0 ? d : 0;
     A.vc = (A.ac + B.ac) / 2 * A.dl;
     A.va = (A.aa + B.aa) / 2 * A.dl;
+    A.vr = (A.ar + B.ar) / 2 * A.dl;
     A.apav = (A.larg + B.larg) / 2 * A.dl;
     A.vcb = A.apav * eRev;
     A.vbs = A.apav * eBas;
@@ -1965,6 +1966,7 @@ function calcTopo() {
     set('tp_dl_' + L.i, L.dl === null ? '—' : fmt(L.dl, 2));
     set('tp_vc_' + L.i, L.vc === null ? '—' : fmt(L.vc, 2));
     set('tp_va_' + L.i, L.va === null ? '—' : fmt(L.va, 2));
+    set('tp_vr_' + L.i, L.vr === null ? '—' : fmt(L.vr, 2));
     set('tp_vcb_' + L.i, L.vcb === null ? '—' : fmt(L.vcb, 2));
     set('tp_vbs_' + L.i, L.vbs === null ? '—' : fmt(L.vbs, 2));
     set('tp_vsb_' + L.i, L.vsb === null ? '—' : fmt(L.vsb, 2));
@@ -1974,14 +1976,14 @@ function calcTopo() {
   });
 
   // Totais da obra.
-  let totVc = 0,totVa = 0,apav = 0,vCBUQ = 0,vBase = 0,vSB = 0,vRef = 0;
+  let totVc = 0,totVa = 0,totVre = 0,apav = 0,vCBUQ = 0,vBase = 0,vSB = 0,vRef = 0;
   linhas.forEach((L) => {
-    totVc += L.vc || 0;totVa += L.va || 0;apav += L.apav || 0;
+    totVc += L.vc || 0;totVa += L.va || 0;totVre += L.vr || 0;apav += L.apav || 0;
     vCBUQ += L.vcb || 0;vBase += L.vbs || 0;vSB += L.vsb || 0;vRef += L.vrf || 0;
   });
   const extensao = linhas.length > 1 ? linhas[linhas.length - 1].est - linhas[0].est : 0;
-  const bota = Math.max(0, totVc - totVa); // sobra de material a retirar
-  const empr = Math.max(0, totVa - totVc); // falta de material a importar
+  const bota = Math.max(0, totVc - totVa - totVre); // sobra de material a retirar (o reaterro reaproveita o corte)
+  const empr = Math.max(0, totVa + totVre - totVc); // falta de material a importar
   const nCrit = linhas.filter((L) => L.naCritico).length;
 
   const set2 = (id, txt) => {const el = document.getElementById(id);if (el) el.textContent = txt;};
@@ -1989,6 +1991,7 @@ function calcTopo() {
   set2('topo_vol_corte', fmt(totVc, 2) + ' m³');
   set2('topo_vol_aterro', fmt(totVa, 2) + ' m³');
   set2('topo_botafora', fmt(bota, 2) + ' m³');
+  set2('topo_vol_reaterro', fmt(totVre, 2) + ' m³');
   set2('topo_area_pav', fmt(apav, 2) + ' m²');
   set2('topo_vol_cbuq', fmt(vCBUQ, 2) + ' m³');
   set2('topo_vol_base', fmt(vBase, 2) + ' m³');
@@ -2009,12 +2012,13 @@ function calcTopo() {
     geral = empr > 0.005 ? 'Falta material: empréstimo de ' + fmt(empr, 2) + ' m³.' :
     bota > 0.005 ? 'Sobra material: bota-fora de ' + fmt(bota, 2) + ' m³.' :
     'Corte e aterro compensados.';
+    if (totVre > 0.005 && !(_mf && _mf.tipo !== 'nenhum')) geral += ' Meio-fio não definido: reaterro lateral até o topo do pavimento.';
     if (nCrit) geral += ' ' + nCrit + (nCrit > 1 ? ' estacas' : ' estaca') +
     ' com afastamento do N.A. abaixo de ' + fmt(afMin, 2) + ' m.';
   }
   set2('topo_status', geral);
 
-  _R._topo = { totVc: totVc, totVa: totVa, totVbf: bota, totVem: empr, areaPav: apav,
+  _R._topo = { totVc: totVc, totVa: totVa, totVre: totVre, semMeioFio: !(_mf && _mf.tipo !== 'nenhum'), totVbf: bota, totVem: empr, areaPav: apav,
     volCBUQ: vCBUQ, volBase: vBase, volSB: vSB, volRef: vRef,
     extensao: extensao, afMin: afMin, nCritico: nCrit,
     linhas: linhas, data: linhas };
@@ -2043,7 +2047,7 @@ function recalcTopo(btn) {
 function topoCabecalho() {
   return ['Estaca (m)', 'Terreno Esq. (m)', 'Terreno Eixo (m)', 'Terreno Dir. (m)',
   'Greide Eixo (m)', 'Largura (m)', 'Cota N.A. (m)', 'Form. Eixo (m)', 'Área Corte (m²)',
-  'Área Aterro (m²)', 'Dist. Trecho (m)', 'Corte (m³)', 'Aterro (m³)',
+  'Área Aterro (m²)', 'Dist. Trecho (m)', 'Corte (m³)', 'Aterro (m³)', 'Reaterro (m³)',
   'CBUQ (m³)', 'Base (m³)', 'Sub-base (m³)', 'Reforço (m³)',
   'Afast. N.A. (m)', 'Situação'];
 }
@@ -2051,7 +2055,7 @@ function topoLinhas() {
   const n = (x) => x === null || x === undefined || isNaN(x) ? '' : Number(Number(x).toFixed(3));
   return (_R._topo && _R._topo.linhas || []).map((L) => [
   n(L.est), n(L.te), n(L.tc), n(L.td), n(L.gr), n(L.larg), n(L.na), n(L.form),
-  n(L.ac), n(L.aa), n(L.dl), n(L.vc), n(L.va),
+  n(L.ac), n(L.aa), n(L.dl), n(L.vc), n(L.va), n(L.vr),
   n(L.vcb), n(L.vbs), n(L.vsb), n(L.vrf), n(L.afna), L.sit]
   );
 }
@@ -2062,6 +2066,7 @@ function topoResumo() {
   ['Extensão total:', d.extensao ? fmt(d.extensao, 2) + ' m' : '—'],
   ['Volume de corte:', m(d.totVc, 'm³')],
   ['Volume de aterro:', m(d.totVa, 'm³')],
+  ['Reaterro lateral:', m(d.totVre, 'm³')],
   ['Bota-fora:', m(d.totVbf, 'm³')],
   ['Empréstimo:', m(d.totVem, 'm³')],
   ['Área pavimentada:', m(d.areaPav, 'm²')],
@@ -2145,7 +2150,9 @@ function secaoParams() {
   const eRef = (_R.e_ref || 0) / 100,eBase = (_R.e_base || 0) / 100;
   const eSB = (_R.e_sb || 0) / 100,eR = (_R.e_r || 0) / 100;
   return {
-    talC: v('c_talcorte') || 1.5, talA: v('c_talaterro') || 1.5,
+    talC: ((x) => isNaN(x) ? 1.5 : x)(parseFloat(document.getElementById('c_talcorte') && document.getElementById('c_talcorte').value)),
+    talA: v('c_talaterro') || 1.5,
+    hMF: _mf && _mf.tipo !== 'nenhum' ? (_mf.esp || 0) / 100 : 0,
     berma: v('c_berma') || 0,
     cEsq: (v('topo_caim_esq') || 0) / 100, cDir: (v('topo_caim_dir') || 0) / 100,
     camadas: [['CBUQ', eRef, '#2b2b2b'], ['Base', eBase, '#c49a3a'],
@@ -2154,6 +2161,55 @@ function secaoParams() {
     ev: v('c_ev') || 1,
     mf: _mf && _mf.tipo !== 'nenhum' ? _mf : null
   };
+}
+
+/* Integral de max(0, f) para f linear de f0 a f1 em um trecho de largura w. */
+function intPos(f0, f1, w) {
+  if (f0 >= 0 && f1 >= 0) return (f0 + f1) / 2 * w;
+  if (f0 <= 0 && f1 <= 0) return 0;
+  const p = Math.max(f0, f1),q = Math.min(f0, f1);
+  return p * p / (p - q) * w / 2;
+}
+const talTxt = (x) => x <= 0 ? 'vertical' : fmt(x, 2) + ':1';
+
+/* Áreas da seção (m²), incluindo plataforma e taludes:
+   corte  = terreno acima da linha de escavação (formação na plataforma, talude fora dela);
+   aterro = linha de projeto acima do terreno (formação na plataforma, talude fora dela);
+   reaterro = enchimento lateral entre o talude de corte e o pavimento. */
+function secaoAreas(L, G, P) {
+  const b = G.b,xl = -(b + G.E.d),xr = b + G.D.d;
+  const T = [[xl, G.E.tInt], [-b, G.tE], [0, G.tC], [b, G.tD], [xr, G.D.tInt]];
+  const Fm = [[-b, G.E.yF], [0, G.form], [b, G.D.yF]];
+  const OE = [[xl, G.E.yInt], [-b, G.E.y0]],OD = [[b, G.D.y0], [xr, G.D.yInt]];
+  const ev = (a, x) => {
+    for (let i = 0; i < a.length - 1; i++) {
+      if (x >= a[i][0] - 1e-12 && x <= a[i + 1][0] + 1e-12) {
+        const dx = a[i + 1][0] - a[i][0];
+        return dx < 1e-12 ? a[i + 1][1] : a[i][1] + (a[i + 1][1] - a[i][1]) * (x - a[i][0]) / dx;
+      }
+    }
+    return x < a[0][0] ? a[0][1] : a[a.length - 1][1];
+  };
+  const integ = (f, g, x0, x1, quebras) => {// ∫ max(0, f − g)
+    if (!(x1 - x0 > 1e-12)) return 0;
+    const xs = [x0, x1];
+    quebras.forEach((a) => a.forEach((p) => {if (p[0] > x0 + 1e-12 && p[0] < x1 - 1e-12) xs.push(p[0]);}));
+    xs.sort((p, q) => p - q);
+    let A = 0;
+    for (let i = 0; i < xs.length - 1; i++) {
+      const a = xs[i],c = xs[i + 1];if (c - a < 1e-12) continue;
+      A += intPos(f(a) - g(a), f(c) - g(c), c - a);
+    }
+    return A;
+  };
+  const Tf = (x) => ev(T, x),Ff = (x) => ev(Fm, x);
+  let ac = integ(Tf, Ff, -b, b, [T, Fm]),aa = integ(Ff, Tf, -b, b, [T, Fm]);
+  [[G.E, OE, xl, -b], [G.D, OD, b, xr]].forEach(([Ld, O, x0, x1]) => {
+    const Of = (x) => ev(O, x);
+    if (Ld.corte) ac += integ(Tf, Of, x0, x1, [T, O]);else aa += integ(Of, Tf, x0, x1, [T, O]);
+  });
+  const ar = (G.E.re ? G.E.re.area : 0) + (G.D.re ? G.D.re.area : 0);
+  return { ac: ac, aa: aa, ar: ar };
 }
 
 function secaoGeom(L, P) {
@@ -2165,11 +2221,31 @@ function secaoGeom(L, P) {
     const k = (tB - tC) / b; // inclinação do terreno, por metro para fora
     const h = tB - yF,corte = h > 0;
     const y0 = corte ? yF : yS,tal = corte ? P.talC : P.talA,s = corte ? 1 : -1;
-    const den = s / tal - k;
-    let d = den !== 0 ? (tB - y0) / den : NaN,semInt = false;
-    if (!isFinite(d) || d < 0 || d > 25) {d = 8;semInt = true;} // talude e terreno não se encontram
+    let d,semInt = false;
+    if (tal <= 0) {d = 0;} // talude vertical: parede reta até o terreno
+    else {
+      const den = s / tal - k;
+      d = den !== 0 ? (tB - y0) / den : NaN;
+      if (!isFinite(d) || d < 0 || d > 25) {d = 8;semInt = true;} // talude e terreno não se encontram
+    }
+    const yInt = tal <= 0 ? tB : y0 + s * d / tal;
+    // reaterro lateral: no corte inclinado, o espaço entre o talude e a borda do pavimento
+    // é preenchido até o topo do meio-fio (ou até a superfície do pavimento, sem meio-fio)
+    let re = null;
+    if (corte && tal > 0 && d > 0) {
+      const yTop = yS + P.hMF;
+      const O = (u) => yF + u / tal,Tt = (u) => tB + k * u,U = (u) => Math.min(yTop, Tt(u));
+      const us = [0, d];
+      const uk = k !== 0 ? (yTop - tB) / k : NaN,uo = (yTop - yF) * tal;
+      [uk, uo].forEach((u) => {if (isFinite(u) && u > 0 && u < d) us.push(u);});
+      us.sort((a, b2) => a - b2);
+      let area = 0;
+      for (let i = 0; i < us.length - 1; i++) area += intPos(U(us[i]) - O(us[i]), U(us[i + 1]) - O(us[i + 1]), us[i + 1] - us[i]);
+      const sup = us.map((u) => [u, U(u)]),inf = us.slice().reverse().map((u) => [u, Math.min(O(u), U(u))]);
+      re = { area: area, pts: sup.concat(inf), yTop: yTop };
+    }
     return { tB: tB, yS: yS, yF: yF, k: k, h: h, corte: corte, y0: y0, tal: tal, s: s, d: d, semInt: semInt,
-      yInt: y0 + s * d / tal, tInt: tB + k * d };
+      yInt: yInt, tInt: tB + k * d, re: re };
   };
   return { b: b, form: form, tE: tE, tC: tC, tD: tD, E: lado(tE, P.cEsq), D: lado(tD, P.cDir),
     hC: tC - form };
@@ -2193,12 +2269,15 @@ function secaoSVG(L, G, P, papel) {
   P.camadas.forEach((c) => leg.push([c[2], c[0] === 'CBUQ' ? 'Revestimento (CBUQ)' : c[0] === 'Reforço' ? 'Reforço do subleito' : c[0], 'q']));
   if (P.berma > 0 && P.berma < b) leg.push(['#8c8c8c', 'Berma', 'l']);
   if (P.mf) {leg.push(['#b8bcc4', P.mf.tipo === 'conjugado' ? 'Meio-fio' : 'Meio-fio simples', 'q']);if (P.mf.tipo === 'conjugado') leg.push(['#d5d8de', 'Sarjeta', 'q']);}
+  const temRe = !!(G.E.re || G.D.re);
+  if (temRe) leg.push(['#7fbf6a', 'Reaterro lateral', 'q']);
   leg.push(['#6b4a1e', 'Terreno natural (perfil)', 'l'], ['#a98a5a', 'Solo natural', 'q'], ['#e08a4a', 'Aterro', 'q'], ['#4a90d9', 'Corte', 'q'], [C.acc, 'Formação (subleito)', 'd']);
   if (L.na !== null && L.na > 0) leg.push(['#2f7fd1', 'Nível d\'água (N.A.)', 'd']);
   const legPos = [];let lx = 8,lrow = 0;
   leg.forEach((it) => {const w = 30 + it[1].length * 5.3 + 12;if (lx + w > W - 8 && lx > 8) {lx = 8;lrow++;}legPos.push([lx, lrow]);lx += w;});
+  const nota = temRe ? P.mf ? 'Reaterro lateral até o topo do meio-fio (' + fmt(P.hMF * 100, 0) + ' cm acima da superfície).' : 'Reaterro lateral até o topo do pavimento. Meio-fio não definido na Topografia.' : '';
   const legH = (lrow + 1) * 17 + 8;
-  bot += legH;
+  bot += legH + (nota ? 15 : 0);
   const sc = Math.min((W - 2 * padX) / (xr - xl), 60);
   const scv = Math.min(sc * P.ev, 340 / (ymax - ymin));
   const ox = (W - (xr - xl) * sc) / 2;
@@ -2251,6 +2330,10 @@ function secaoSVG(L, G, P, papel) {
   s += `<polygon points="${pts(terreno.concat([[xr, ymin], [xl, ymin]]))}" fill="#a98a5a" fill-opacity=".5"/>`;
   // corte (acima do perfil de projeto, dentro do terreno)
   s += `<polygon points="${pts(perfil.concat([[xr, ymax], [xl, ymax]]))}" fill="#4a90d9" fill-opacity=".22" clip-path="url(#${uid})"/>`;
+  // reaterro lateral (corte inclinado)
+  [[G.E, -1], [G.D, 1]].forEach(([Ld, sn]) => {
+    if (Ld.re && Ld.re.area > 0) s += `<polygon points="${pts(Ld.re.pts.map((p) => [sn * (b + p[0]), p[1]]))}" fill="#7fbf6a" fill-opacity=".7" stroke="#4d8a3c" stroke-width=".8"/>`;
+  });
   // N.A.
   if (naVisivel) {
     s += `<line x1="${X(xl)}" y1="${Y(L.na)}" x2="${X(xr)}" y2="${Y(L.na)}" stroke="#2f7fd1" stroke-width="1.5" stroke-dasharray="7 4"/>`;
@@ -2293,7 +2376,7 @@ function secaoSVG(L, G, P, papel) {
   [[G.E, -1], [G.D, 1]].forEach(([Ld, sn]) => {
     const x1 = sn * b,x2 = sn * (b + Ld.d);
     s += `<line x1="${X(x1)}" y1="${Y(Ld.y0)}" x2="${X(x2)}" y2="${Y(Ld.yInt)}" stroke="${C.fg2}" stroke-width="1.8"${Ld.semInt ? ' stroke-dasharray="5 3"' : ''}/>`;
-    rot(6, fmt(Ld.tal, 2) + ':1' + (Ld.semInt ? ' (sem encontro)' : ''), X((x1 + x2) / 2), Y((Ld.y0 + Ld.yInt) / 2) + (Ld.corte ? -7 : 14), 10.5, 'middle', C.fg2, false, Ld.corte ? -1 : 1);
+    rot(6, talTxt(Ld.tal) + (Ld.semInt ? ' (sem encontro)' : ''), X((x1 + x2) / 2), Y((Ld.y0 + Ld.yInt) / 2) + (Ld.corte ? -7 : 14), 10.5, 'middle', C.fg2, false, Ld.corte ? -1 : 1);
   });
   // terreno natural
   s += `<polyline points="${pts(terreno)}" fill="none" stroke="#6b4a1e" stroke-width="2.2" stroke-linejoin="round"/>`;
@@ -2310,7 +2393,7 @@ function secaoSVG(L, G, P, papel) {
   // cabeçalho
   const sit = L.sit && L.sit !== '—' ? L.sit : '';
   s += `<text x="8" y="18" font-size="14" font-weight="700" fill="${C.fg}">Estaca ${String(L.est).replace('.', ',')}${sit ? ' — ' + sit : ''}</text>` +
-  `<text x="${W - 8}" y="18" font-size="11" text-anchor="end" fill="${C.fg2}">Área corte ${f2(L.ac)} m² · aterro ${f2(L.aa)} m²</text>` +
+  `<text x="${W - 8}" y="18" font-size="11" text-anchor="end" fill="${C.fg2}">Área corte ${f2(L.ac)} m² · aterro ${f2(L.aa)} m²${L.ar > 0 ? ' · reaterro ' + f2(L.ar) + ' m²' : ''}</text>` +
   `<text x="8" y="36" font-size="10.5" fill="${C.fg3}">Altura terreno − formação:  esq. ${sg(G.E.h)} · eixo ${sg(G.hC)} · dir. ${sg(G.D.h)} m   (+ corte / − aterro)</text>`;
   // cotas inferiores
   const yb = Y(ymin) + 20;
@@ -2321,13 +2404,14 @@ function secaoSVG(L, G, P, papel) {
   const mfTxt = P.mf ? ' · ' + mfTextoCurto(P.mf) : '';
   const geo = P.berma > 0 && pista > 0 ? `pista ${f2(pista)} m + 2 bermas de ${f2(P.berma)} m · ` : '';
   const camTxt = P.camadas.map((c) => c[0] + ' ' + fmt(c[1] * 100, 1)).join(' · ');
+  if (nota) s += `<text x="${W / 2}" y="${yb + 58}" font-size="10" font-weight="700" text-anchor="middle" fill="#3f7a2e">${nota}</text>`;
   s += `<text x="${W / 2}" y="${yb + 30}" font-size="10" text-anchor="middle" fill="${C.fg3}">${geo}caimento ${fmt(P.cEsq * 100, 1)}% / ${fmt(P.cDir * 100, 1)}%${mfTxt}</text>` +
   `<text x="${W / 2}" y="${yb + 44}" font-size="10" text-anchor="middle" fill="${C.fg3}">${camTxt} cm (total ${fmt(P.eTot * 100, 1)} cm)${P.ev !== 1 ? ' · escala vertical ×' + P.ev : ''}</text>`;
   // legenda
   const ly0 = H - legH + 6;
   leg.forEach((it, i) => {
     const [px, row] = legPos[i],py = ly0 + row * 17;
-    if (it[2] === 'q') s += `<rect x="${px}" y="${py}" width="16" height="10" fill="${it[0]}"${it[0] === '#4a90d9' ? ' fill-opacity=".35"' : it[0] === '#e08a4a' || it[0] === '#a98a5a' ? ' fill-opacity=".6"' : ''} stroke="#6b7280" stroke-width=".6"/>`;else
+    if (it[2] === 'q') s += `<rect x="${px}" y="${py}" width="16" height="10" fill="${it[0]}"${it[0] === '#4a90d9' ? ' fill-opacity=".35"' : it[0] === '#e08a4a' || it[0] === '#a98a5a' || it[0] === '#7fbf6a' ? ' fill-opacity=".7"' : ''} stroke="#6b7280" stroke-width=".6"/>`;else
     s += `<line x1="${px}" y1="${py + 5}" x2="${px + 16}" y2="${py + 5}" stroke="${it[0]}" stroke-width="${it[2] === 'l' ? 3 : 1.5}"${it[2] === 'd' ? ' stroke-dasharray="4 3"' : ''}/>`;
     s += `<text x="${px + 21}" y="${py + 9}" font-size="10" fill="${C.fg2}">${it[1]}</text>`;
   });
@@ -2356,7 +2440,7 @@ function secaoTabela() {
   const P = secaoParams();
   return secaoSelecionadas().filter((o) => o.G).map((o) => {
     const L = o.L,G = o.G;
-    const tal = (Ld) => n(Ld.tal, 2) + ':1' + (Ld.semInt ? ' (sem encontro)' : '');
+    const tal = (Ld) => (Ld.tal <= 0 ? 'vertical' : n(Ld.tal, 2) + ':1') + (Ld.semInt ? ' (sem encontro)' : '');
     return [n(L.est), L.sit, n(L.larg, 2), n(L.gr), n(G.form), n(G.tE), n(G.tC), n(G.tD),
     n(G.E.h), n(G.hC), n(G.D.h), n(L.ac, 2), n(L.aa, 2),
     tal(G.E), n(G.E.d, 2), tal(G.D), n(G.D.d, 2)];
@@ -2427,6 +2511,8 @@ function updateCorte() {
     if (!o.G) {semDados++;html += `<div class="sec-card"><p class="sec-aviso"><strong>Estaca ${String(o.L.est).replace('.', ',')}:</strong> faltam dados. Informe o terreno no eixo, o greide e a largura na aba Topografia.</p></div>`;return;}
     html += '<div class="sec-card">' + secaoSVG(o.L, o.G, P, false).svg + '</div>';
   });
+  const temRe = _secSel.some((o) => o.G && (o.G.E.re || o.G.D.re));
+  if (temRe) html = '<div class="val-bar ' + (P.mf ? 'ok' : 'warn') + '" style="grid-column:1/-1">' + (P.mf ? 'Reaterro lateral até o topo do meio-fio (' + mfTextoCurto(P.mf) + ').' : 'Meio-fio não definido na Topografia. O reaterro lateral foi calculado até o topo do pavimento. Use o botão "Meio-fio…" na aba Topografia para defini-lo.') + '</div>' + html;
   box.innerHTML = html;
   if (info) info.textContent = 'Mostrando ' + secaoFaixaTexto() + (semDados ? ' · ' + semDados + ' sem dados completos' : '') + '.';
   const cab = secaoCabecalho(),lin = secaoTabela();
@@ -2539,6 +2625,7 @@ function updateMemoria() {
     <h3>10. Volumes de Terraplenagem</h3>
     <p>Volume de Corte: <strong>${topoR.totVc ? fmt(topoR.totVc, 1) + ' m³' : '—'}</strong><br>
     Volume de Aterro: <strong>${topoR.totVa ? fmt(topoR.totVa, 1) + ' m³' : '—'}</strong><br>
+    Reaterro lateral (corte inclinado): <strong>${topoR.totVre ? fmt(topoR.totVre, 1) + ' m³' : '—'}</strong><br>
     Bota-Fora: <strong>${topoR.totVbf ? fmt(topoR.totVbf, 1) + ' m³' : '—'}</strong><br>
     Área Pavimentada: <strong>${topoR.areaPav ? fmt(topoR.areaPav, 1) + ' m²' : '—'}</strong></p>
   </div>
@@ -2671,7 +2758,7 @@ function aplicarProjeto(p) {
         if (c.incr) set('incr', c.incr);if (c.emin_base) set('emin_base', c.emin_base);
         if (c.emin_gran) set('emin_gran', c.emin_gran);if (c.e_max_camada) set('e_max_camada', c.e_max_camada);
         if (c.modo_fator) {const el = document.getElementById('modo_fator');if (el) el.value = c.modo_fator;}}
-      if (p.corte) {set('c_talcorte', p.corte.c_talcorte);
+      if (p.corte) {set('c_talcorte', p.corte.c_talcorte === 0 ? '0' : p.corte.c_talcorte);
         set('c_talaterro', p.corte.c_talaterro);set('c_berma', p.corte.c_berma);}
       if ((_p$topo = p.topo) != null && _p$topo.rows) {
         document.getElementById('topo_tbody').innerHTML = '';
@@ -2709,7 +2796,7 @@ function importarProjeto(ev) {
 /* ============================================================
    EXPORT — HELPERS
    ============================================================ */
-function getMemoriaRows() {var _R$_topo, _R$_topo2, _R$_topo3;
+function getMemoriaRows() {var _R$_topo, _R$_topo2, _R$_topo3, _R$_topo4;
   const R = _R;const sc = SCENARIOS[selectedScenario];
   return [
   ['DIMENSIONAMENTO DE PAVIMENTO FLEXÍVEL — IP-06/2004', ''],
@@ -2757,7 +2844,8 @@ function getMemoriaRows() {var _R$_topo, _R$_topo2, _R$_topo3;
   ['VOLUMES DE TERRAPLENAGEM', ''],
   ['Volume Corte (m³):', (_R$_topo = R._topo) != null && _R$_topo.totVc ? fmt(R._topo.totVc, 1) : '—'],
   ['Volume Aterro (m³):', (_R$_topo2 = R._topo) != null && _R$_topo2.totVa ? fmt(R._topo.totVa, 1) : '—'],
-  ['Bota-Fora (m³):', (_R$_topo3 = R._topo) != null && _R$_topo3.totVbf ? fmt(R._topo.totVbf, 1) : '—'],
+  ['Reaterro lateral (m³):', (_R$_topo3 = R._topo) != null && _R$_topo3.totVre ? fmt(R._topo.totVre, 1) : '—'],
+  ['Bota-Fora (m³):', (_R$_topo4 = R._topo) != null && _R$_topo4.totVbf ? fmt(R._topo.totVbf, 1) : '—'],
   ['', ''],
   ['NORMAS E REFERÊNCIAS', ''],
   ['', 'DNIT IP-06/2004 — Pavimentação Asfáltica: Restauração'],
@@ -2769,14 +2857,14 @@ function getMemoriaRows() {var _R$_topo, _R$_topo2, _R$_topo3;
 /* ============================================================
    EXPORT — EXCEL (MEMÓRIA COMPLETA)
    ============================================================ */
-function exportarMemoriaExcel() {var _R$_topo4;
+function exportarMemoriaExcel() {var _R$_topo5;
   if (typeof XLSX === 'undefined') {avisarErro('Biblioteca de planilhas não carregada. Verifique a conexão com a internet e recarregue a página.');return;}
   const ws = XLSX.utils.aoa_to_sheet(getMemoriaRows());
   ws['!cols'] = [{ wch: 38 }, { wch: 28 }];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Memória de Cálculo');
   // Add topo sheet
-  if ((_R$_topo4 = _R._topo) != null && (_R$_topo4 = _R$_topo4.linhas) != null && _R$_topo4.length) {
+  if ((_R$_topo5 = _R._topo) != null && (_R$_topo5 = _R$_topo5.linhas) != null && _R$_topo5.length) {
     const wsT = XLSX.utils.aoa_to_sheet([...topoResumo(), [''], topoCabecalho(), ...topoLinhas()]);
     XLSX.utils.book_append_sheet(wb, wsT, 'Topografia');
   }
@@ -3577,7 +3665,7 @@ ${body}</body></html>`;
     const c3 = (x) => x === null || x === undefined || isNaN(x) ? '—' : fmt(x, 3);
     const resumoRows = topoResumo().map((r) => `<tr><td>${r[0].replace(/:$/, '')}</td><td>${r[1]}</td></tr>`).join('');
     const secaoRows = L.map((d) => `<tr><td>${c(d.est)}</td><td>${c3(d.te)}</td><td>${c3(d.tc)}</td><td>${c3(d.td)}</td><td>${c3(d.gr)}</td><td>${c(d.larg)}</td><td>${c3(d.form)}</td><td>${c(d.ac)}</td><td>${c(d.aa)}</td><td>${d.sit}</td></tr>`).join('');
-    const volRows = L.map((d) => `<tr><td>${c(d.est)}</td><td>${c(d.dl)}</td><td>${c(d.vc)}</td><td>${c(d.va)}</td><td>${c(d.vcb)}</td><td>${c(d.vbs)}</td><td>${c(d.vsb)}</td><td>${c(d.vrf)}</td></tr>`).join('');
+    const volRows = L.map((d) => `<tr><td>${c(d.est)}</td><td>${c(d.dl)}</td><td>${c(d.vc)}</td><td>${c(d.va)}</td><td>${c(d.vr)}</td><td>${c(d.vcb)}</td><td>${c(d.vbs)}</td><td>${c(d.vsb)}</td><td>${c(d.vrf)}</td></tr>`).join('');
     const naRows = L.filter((d) => d.na !== null && d.na > 0).map((d) => `<tr><td>${c(d.est)}</td><td>${c3(d.form)}</td><td>${c3(d.na)}</td><td>${c(d.afna)}</td><td>${d.naCritico ? 'ABAIXO DO MÍNIMO' : 'Atende'}</td></tr>`).join('');
     html = wrap(`
     <h2>Resumo de Volumes</h2>
@@ -3586,7 +3674,7 @@ ${body}</body></html>`;
     <h2>Seções — Cotas e Áreas</h2>
     <table><tr><th>Estaca</th><th>T. Esq.</th><th>T. Eixo</th><th>T. Dir.</th><th>Greide</th><th>Largura</th><th>Form.</th><th>Á. Corte (m²)</th><th>Á. Aterro (m²)</th><th>Situação</th></tr>${secaoRows}</table>
     <h2>Volumes por Trecho</h2>
-    <table><tr><th>Estaca</th><th>Dist. (m)</th><th>Corte (m³)</th><th>Aterro (m³)</th><th>CBUQ (m³)</th><th>Base (m³)</th><th>Sub-base (m³)</th><th>Reforço (m³)</th></tr>${volRows}</table>
+    <table><tr><th>Estaca</th><th>Dist. (m)</th><th>Corte (m³)</th><th>Aterro (m³)</th><th>Reaterro (m³)</th><th>CBUQ (m³)</th><th>Base (m³)</th><th>Sub-base (m³)</th><th>Reforço (m³)</th></tr>${volRows}</table>
     ${naRows ? `<h2>Verificação do Nível d'Água</h2>
     <table><tr><th>Estaca</th><th>Cota de Formação</th><th>Cota do N.A.</th><th>Afastamento (m)</th><th>Situação</th></tr>${naRows}</table>` : ''}
     `, 'Topografia e Volumes');
@@ -3843,7 +3931,7 @@ async function exportarTudo() {
   await exportarMemoriaWord();
   await new Promise((r) => setTimeout(r, 500));
   // Excel com todas as abas
-  if (typeof XLSX !== 'undefined') {var _R$_topo5;
+  if (typeof XLSX !== 'undefined') {var _R$_topo6;
     const wb = XLSX.utils.book_new();
     const addSheet = (aoa, name) => {
       const ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -3860,7 +3948,7 @@ async function exportarTudo() {
     ['Reforço do subleito', R.e_r > 0 ? fmt(R.e_r, 1) : '—'], ['Total', fmt(R.e_total || 0, 1)]],
     'Dimensionamento');
     // Topo sheet
-    if ((_R$_topo5 = _R._topo) != null && (_R$_topo5 = _R$_topo5.linhas) != null && _R$_topo5.length) {
+    if ((_R$_topo6 = _R._topo) != null && (_R$_topo6 = _R$_topo6.linhas) != null && _R$_topo6.length) {
       addSheet([...topoResumo(), [''], topoCabecalho(), ...topoLinhas()], 'Topografia');
     }
     anexarProjetoXlsx(wb);const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
