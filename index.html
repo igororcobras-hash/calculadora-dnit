@@ -1293,7 +1293,7 @@ Nuvem.listarUsuarios = async function(){
   if(!u || !u.admin) throw new Error('Somente administradores.');
   const snap = await fs.getDocs(fs.query(fs.collection(d,'usuarios'), fs.limit(500)));
   const admins = listaAdmins();
-  return snap.docs.map(x=>{
+  const lista = snap.docs.map(x=>{
     const v = x.data();
     const venc = paraData(v.validade);
     return {uid:x.id, usuario:v.usuario||'', nome:v.nome||'', empresa:v.empresa||'',
@@ -1302,6 +1302,13 @@ Nuvem.listarUsuarios = async function(){
             admin: admins.indexOf(String(v.email||'').toLowerCase()) >= 0 || !!v.admin,
             vencida: !!(venc && venc.getTime() < Date.now())};
   }).sort((a,b)=> (a.usuario||'').localeCompare(b.usuario||''));
+  // Administradores da lista oficial que ainda não têm cadastro (nunca entraram)
+  admins.forEach(em => {
+    if(!lista.some(x => String(x.email||'').toLowerCase() === em))
+      lista.push({uid:null, usuario:nomeDeEmail(em), nome:'', empresa:'', email:em, ativo:true, recusado:false,
+                  criadoEm:null, validade:null, admin:true, vencida:false, nuncaEntrou:true});
+  });
+  return lista;
 };
 
 Nuvem.atualizarUsuario = async function(uid, campos){
@@ -3842,12 +3849,12 @@ function confirmarExcluirNuvem(id) {
 function abrirAdmin() {
   const N = window.Nuvem;
   if (!N || !N.usuario || !N.usuario.admin) {avisarErro('Somente administradores.');return;}
-  abrirModal('Usuários', 'Aprove os cadastros novos e defina a validade da licença. Sem data, o acesso não expira.');
+  abrirModal('Usuários', 'Administradores no topo, depois os cadastros pendentes. “Redefinir senha” envia ao e-mail da pessoa um link para criar nova senha.');
   N.listarUsuarios().then((lista) => {
     if (!lista.length) {corpoModal('<p style="font-size:13px;color:var(--fg2);margin-top:10px">Nenhum usuário cadastrado ainda. Quem criar conta na tela de login aparece aqui.</p>');return;}
     const estado = (u) => u.admin ? 'adm' : u.recusado ? 'rec' : !u.ativo ? 'pen' : u.vencida ? 'ven' : 'ok';
     const ordem = { pen: 0, ven: 1, ok: 2, rec: 3, adm: 4 };
-    lista.sort((x, y) => ordem[estado(x)] - ordem[estado(y)] || (x.nome || x.usuario).localeCompare(y.nome || y.usuario));
+    lista.sort((x, y) => (ordem[estado(x)] === 4 ? -1 : ordem[estado(x)]) - (ordem[estado(y)] === 4 ? -1 : ordem[estado(y)]) || (x.nome || x.usuario).localeCompare(y.nome || y.usuario));
     const rotulo = { adm: 'Administrador', rec: 'Recusado', pen: 'Aguardando aprovação', ven: 'Licença vencida', ok: 'Ativo' };
     const cor = { adm: 'badge-info', rec: 'badge-warn', pen: 'badge-warn', ven: 'badge-warn', ok: 'badge-ok' };
     let h = '<table class="lista-nuvem"><tr><th>E-mail</th><th>Nome / Empresa</th><th>Validade</th><th>Situação</th><th></th></tr>';
@@ -3855,22 +3862,35 @@ function abrirAdmin() {
       const e = estado(u);
       const dt = u.validade ? u.validade.toISOString().slice(0, 10) : '';
       const bt = (txt, ativo, rec) => '<button class="tb-btn" onclick="salvarUsuario(\'' + u.uid + '\',' + ativo + ',' + rec + ')">' + txt + '</button> ';
+      const redef = '<button class="tb-btn" data-email="' + escapar(u.email || '') + '" onclick="enviarRedefinicao(this.dataset.email)" title="Envia ao e-mail da pessoa um link para criar nova senha">Redefinir senha</button> ';
       let acoes = '';
       if (e === 'pen') acoes = bt('Aprovar', true, false) + bt('Recusar', false, true);else
       if (e === 'rec') acoes = bt('Aprovar', true, false);else
       if (e !== 'adm') acoes = bt('Bloquear', false, false);
+      if (!u.uid) {
+        h += '<tr><td>' + escapar(u.email) + '</td><td colspan="2" style="color:var(--fg3)">Administrador da lista oficial</td>' +
+        '<td><span class="badge badge-info">Administrador · nunca entrou</span></td><td style="white-space:nowrap">' + redef + '</td></tr>';
+        return;
+      }
       h += '<tr' + (e === 'pen' ? ' style="background:var(--warn)"' : '') + '><td>' + escapar(u.email || u.usuario) + '</td>' +
       '<td><input type="text" id="an_' + u.uid + '" value="' + escapar(u.nome) + '" placeholder="nome" style="width:110px"> ' +
       '<input type="text" id="ae_' + u.uid + '" value="' + escapar(u.empresa) + '" placeholder="empresa" style="width:110px"></td>' +
       '<td><input type="date" id="av_' + u.uid + '" value="' + dt + '"></td>' +
       '<td><span class="badge ' + cor[e] + '">' + rotulo[e] + '</span></td>' +
-      '<td style="white-space:nowrap">' + acoes +
+      '<td style="white-space:nowrap">' + acoes + redef +
       '<button class="tb-btn" onclick="salvarUsuario(\'' + u.uid + '\',null,null)">Gravar</button></td></tr>';
     });
     corpoModal(h + '</table><p style="font-size:11.5px;color:var(--fg3);margin-top:10px">' +
     'Os cadastros novos chegam sozinhos, pela tela de login. “Aprovar” libera o acesso (com a validade da linha, se houver); ' +
     '“Recusar” e “Bloquear” impedem o uso e podem ser desfeitos a qualquer momento.</p>');
   }).catch((e) => corpoModal('<p class="val-bar warn" style="margin-top:10px">' + (e && e.message || e) + '</p>'));
+}
+
+function enviarRedefinicao(email) {
+  if (!email) {avisarErro('Este usuário não tem e-mail cadastrado.');return;}
+  window.Nuvem.redefinirSenha(email).
+  then(() => avisar('Link de nova senha enviado para ' + email + '.')).
+  catch((e) => avisarErro(e && e.message || 'Não foi possível enviar.'));
 }
 
 function salvarUsuario(uid, ativo, recusado) {
