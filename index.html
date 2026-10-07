@@ -334,7 +334,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="msg" id="login-msg"></div>
     <div class="rodape">
       Seu cadastro é analisado pelo administrador antes da liberação.<br>
-      Versão 18 · 07/10/2026
+      Versão 19 · 07/10/2026
     </div>
   </div>
 </div>
@@ -388,16 +388,19 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
       <span class="selo" id="sessao-selo" hidden>Admin</span>
     </span>
     <button id="btn-usuarios" class="theme-btn" onclick="abrirAdmin()" hidden title="Gerenciar usuários">Usuários</button>
-    <button id="btn-sair" class="theme-btn" onclick="sairDaConta()" hidden title="Encerrar a sessão">Sair</button>
     <span class="fonte-ctl" title="Tamanho do texto de toda a calculadora">
       <button type="button" class="theme-btn" onclick="fonteGlobal(-1)" aria-label="Diminuir o texto de tudo">A−</button><button type="button" class="theme-btn" id="fonte-g-pct" onclick="fonteReset()" title="Voltar ao tamanho normal">100%</button><button type="button" class="theme-btn" onclick="fonteGlobal(1)" aria-label="Aumentar o texto de tudo">A+</button>
     </span>
     <button id="device-toggle-btn" class="theme-btn" onclick="abrirSelecaoAmbiente()" style="display:none" title="Trocar o ambiente de uso">Ambiente</button>
     <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro">Tema</button>
+    <button id="btn-sair" class="theme-btn" onclick="confirmarSairDaConta()" hidden title="Encerrar a sessão">Sair</button>
   </div>
 </div>
 
 <div class="toolbar">
+  <span class="fonte-aba"><span class="tb-label">Texto desta aba:</span>
+  <button type="button" class="tb-btn" onclick="fonteAba(-1)" aria-label="Diminuir o texto desta aba">A−</button><button type="button" class="tb-btn" id="fonte-t-pct" onclick="fonteAba(0)" title="Voltar ao tamanho normal nesta aba">100%</button><button type="button" class="tb-btn" onclick="fonteAba(1)" aria-label="Aumentar o texto desta aba">A+</button></span>
+  <span class="tb-sep"></span>
   <span class="tb-label">Projeto:</span>
   <button class="tb-btn tb-btn-save" onclick="salvarProjeto()" title="Salva os dados do projeto em arquivo .json">Salvar projeto</button>
   <button class="tb-btn" onclick="document.getElementById('imp').click()" title="Abre um projeto salvo (.json)">Abrir projeto</button>
@@ -411,9 +414,6 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
   <button class="tb-btn tb-btn-pdf"   onclick="exportarMemoriaPDF()">PDF</button>
   <span class="tb-sep"></span>
   <button class="tb-btn tb-btn-save" onclick="exportarTudo()" title="Gera Excel, Word e PDF da memória">Exportar tudo</button>
-  <span class="tb-sep"></span>
-  <span class="fonte-aba"><span class="tb-label">Texto desta aba:</span>
-  <button type="button" class="tb-btn" onclick="fonteAba(-1)" aria-label="Diminuir o texto desta aba">A−</button><button type="button" class="tb-btn" id="fonte-t-pct" onclick="fonteAba(0)" title="Voltar ao tamanho normal nesta aba">100%</button><button type="button" class="tb-btn" onclick="fonteAba(1)" aria-label="Aumentar o texto desta aba">A+</button></span>
 </div>
 
 <div class="tabs-nav">
@@ -3798,13 +3798,22 @@ function fonteAba(dir) {
 }
 function fonteReset() {_fonte = { g: 1, t: {} };fonteSalvar();aplicarFonte();}
 function aplicarFonte() {
-  const g = Math.max(_fonte.g, _deviceMode === 'ios' ? 1 : 0.5);
-  document.body.style.zoom = g === 1 ? '' : String(g);
+  // O cabeçalho (com Sair, A−/A+, Ambiente e Tema) nunca é ampliado: os botões
+  // ficam sempre no mesmo lugar, mesmo com vários cliques em A+.
+  const piso = _deviceMode === 'ios' ? 1 : 0.5;
+  const g = Math.max(_fonte.g, piso);
+  const zoom = (el, f) => {if (el) el.style.zoom = f === 1 ? '' : String(f);};
+  document.body.style.zoom = '';
+  zoom(document.querySelector('.toolbar'), g);
+  zoom(document.querySelector('.tabs-nav'), g);
+  zoom(document.querySelector('#modal .cx'), g);
+  const fa = document.querySelector('.fonte-aba');
+  if (fa) fa.style.zoom = g === 1 ? '' : String(1 / g); // botões de tamanho da aba não mudam de lugar
   document.querySelectorAll('.tab-content').forEach((el) => {
     const id = el.id.replace('tab-', '');
     let t = _fonte.t[id] || 1;
-    if (g * t < (_deviceMode === 'ios' ? 1 : 0.5)) t = 1 / g;
-    el.style.zoom = t === 1 ? '' : String(t);
+    if (g * t < piso) t = piso / g;
+    zoom(el, g * t);
   });
   const pg = document.getElementById('fonte-g-pct'),pt = document.getElementById('fonte-t-pct');
   if (pg) pg.textContent = Math.round(g * 100) + '%';
@@ -3976,6 +3985,14 @@ function atualizarSeloPendentes() {
     b.textContent = n ? 'Usuários (' + n + ')' : 'Usuários';
     b.title = n ? n + ' cadastro(s) aguardando aprovação' : 'Gerenciar usuários';
   }).catch(() => {});
+}
+
+function confirmarSairDaConta() {
+  abrirModal('Sair da conta', 'Você será desconectado. Projetos não salvos nesta tela serão perdidos.');
+  corpoModal('<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">' +
+  '<button type="button" class="tb-btn" id="btn-cancelar-saida" onclick="fecharModal()">Cancelar</button>' +
+  '<button type="button" class="tb-btn tb-btn-save" onclick="sairDaConta()">Sim, sair</button></div>');
+  const c = document.getElementById('btn-cancelar-saida');if (c) c.focus();
 }
 
 function sairDaConta() {
