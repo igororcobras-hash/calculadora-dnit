@@ -193,6 +193,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 #modal .fechar{float:right;background:none;border:1px solid var(--border);border-radius:5px;
   color:var(--fg2);cursor:pointer;padding:4px 10px;font-size:12px;font-family:inherit;}
 .tabela-rolagem{overflow-x:auto;max-width:100%;}
+@media(max-width:680px){
+  .usuarios-tab, .usuarios-tab tbody, .usuarios-tab tr, .usuarios-tab td{display:block;width:100%;}
+  .usuarios-tab tr:first-child{display:none;}
+  .usuarios-tab tr{border:1px solid var(--border);border-radius:8px;margin-bottom:10px;padding:8px 10px;}
+  .usuarios-tab td{border:none;padding:4px 0;}
+  .usuarios-tab td::before{content:attr(data-l);display:block;font-size:10.5px;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.4px;}
+  .usuarios-tab input[type=text],.usuarios-tab input[type=date]{width:100%!important;margin-bottom:4px;}
+}
 .lista-nuvem .acoes{display:flex;flex-wrap:wrap;gap:4px;}
 .lista-nuvem .badge{white-space:nowrap;}
 .lista-nuvem{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:12px;}
@@ -224,7 +232,20 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 #aviso-inicial:not([hidden]) ~ .tabs-nav,#aviso-inicial:not([hidden]) ~ .tab-content,
 #aviso-inicial:not([hidden]) ~ #splash{display:none!important;}
 
+.fonte-ctl{display:inline-flex;gap:0;}
+.fonte-ctl .theme-btn{border-radius:0;min-width:34px;}
+.fonte-ctl .theme-btn:first-child{border-radius:4px 0 0 4px;}
+.fonte-ctl .theme-btn:last-child{border-radius:0 4px 4px 0;}
+#fonte-t-pct{min-width:52px;text-align:center;}
+.fonte-aba{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.fonte-aba .tb-btn{border-radius:0;}
+.fonte-aba .tb-label{margin-right:4px;}
+
 /* Ajustes de layout mobile */
+body.mode-mobile .app-header{flex-wrap:wrap;padding:10px 12px;}
+body.mode-mobile .header-right{width:100%;flex-wrap:wrap;gap:6px;justify-content:flex-start;}
+body.mode-mobile .toolbar .tb-sep{display:none;}
+body.mode-mobile .fonte-aba{width:100%;}
 body.mode-mobile .app-header h1{font-size:13px;}
 body.mode-mobile .tabs-nav{overflow-x:auto;flex-wrap:nowrap;padding:0 8px;}
 body.mode-mobile .tab-btn{padding:8px 12px;font-size:11.5px;}
@@ -313,7 +334,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="msg" id="login-msg"></div>
     <div class="rodape">
       Seu cadastro é analisado pelo administrador antes da liberação.<br>
-      Versão 17 · 07/10/2026
+      Versão 18 · 07/10/2026
     </div>
   </div>
 </div>
@@ -368,6 +389,9 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     </span>
     <button id="btn-usuarios" class="theme-btn" onclick="abrirAdmin()" hidden title="Gerenciar usuários">Usuários</button>
     <button id="btn-sair" class="theme-btn" onclick="sairDaConta()" hidden title="Encerrar a sessão">Sair</button>
+    <span class="fonte-ctl" title="Tamanho do texto de toda a calculadora">
+      <button type="button" class="theme-btn" onclick="fonteGlobal(-1)" aria-label="Diminuir o texto de tudo">A−</button><button type="button" class="theme-btn" id="fonte-g-pct" onclick="fonteReset()" title="Voltar ao tamanho normal">100%</button><button type="button" class="theme-btn" onclick="fonteGlobal(1)" aria-label="Aumentar o texto de tudo">A+</button>
+    </span>
     <button id="device-toggle-btn" class="theme-btn" onclick="abrirSelecaoAmbiente()" style="display:none" title="Trocar o ambiente de uso">Ambiente</button>
     <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema claro/escuro">Tema</button>
   </div>
@@ -387,6 +411,9 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
   <button class="tb-btn tb-btn-pdf"   onclick="exportarMemoriaPDF()">PDF</button>
   <span class="tb-sep"></span>
   <button class="tb-btn tb-btn-save" onclick="exportarTudo()" title="Gera Excel, Word e PDF da memória">Exportar tudo</button>
+  <span class="tb-sep"></span>
+  <span class="fonte-aba"><span class="tb-label">Texto desta aba:</span>
+  <button type="button" class="tb-btn" onclick="fonteAba(-1)" aria-label="Diminuir o texto desta aba">A−</button><button type="button" class="tb-btn" id="fonte-t-pct" onclick="fonteAba(0)" title="Voltar ao tamanho normal nesta aba">100%</button><button type="button" class="tb-btn" onclick="fonteAba(1)" aria-label="Aumentar o texto desta aba">A+</button></span>
 </div>
 
 <div class="tabs-nav">
@@ -1565,6 +1592,7 @@ function showTab(id) {var _document$getElementB5, _document$querySelect;
   document.querySelectorAll('.tab-content').forEach((t) => t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
   const order = ['dim', 'numN', 'mem', 'corte', 'topo', 'relatorio', 'mat'];
+  _abaAtual = id;aplicarFonte();
   (_document$getElementB5 = document.getElementById('tab-' + id)) == null || _document$getElementB5.classList.add('active');
   (_document$querySelect = document.querySelectorAll('.tab-btn')[order.indexOf(id)]) == null || _document$querySelect.classList.add('active');
   if (id === 'mem') updateMemoria();
@@ -3739,9 +3767,54 @@ function marcarAmbienteDetectado() {
   return det;
 }
 
+/* ---------------- Tamanho do texto ----------------
+   Global (cabeçalho) e por aba (barra de ferramentas). Usa a propriedade
+   CSS zoom, que amplia texto e campos juntos e refaz o layout. No iPhone o
+   mínimo é 100%: abaixo disso o Safari amplia a tela ao tocar num campo. */
+const FONTE_PASSOS = [0.8, 0.9, 1, 1.1, 1.25, 1.4, 1.6];
+let _fonte = { g: 1, t: {} };
+let _abaAtual = 'dim';
+function fontePassos() {return _deviceMode === 'ios' ? FONTE_PASSOS.filter((x) => x >= 1) : FONTE_PASSOS;}
+function fonteLer() {
+  try {
+    const o = JSON.parse(localStorage.getItem('pavFonte') || 'null');
+    if (o && typeof o.g === 'number') _fonte = { g: o.g, t: o.t && typeof o.t === 'object' ? o.t : {} };
+  } catch (e) {}
+}
+function fonteSalvar() {try {localStorage.setItem('pavFonte', JSON.stringify(_fonte));} catch (e) {}}
+function fonteProx(atual, dir) {
+  const p = fontePassos();let i = 0,melhor = 1e9;
+  p.forEach((x, k) => {const d = Math.abs(x - atual);if (d < melhor) {melhor = d;i = k;}});
+  return p[Math.min(p.length - 1, Math.max(0, i + dir))];
+}
+function fonteGlobal(dir) {_fonte.g = fonteProx(_fonte.g, dir);fonteSalvar();aplicarFonte();}
+function fonteAba(dir) {
+  if (dir === 0) delete _fonte.t[_abaAtual];else
+  {
+    const n = fonteProx(_fonte.t[_abaAtual] || 1, dir);
+    if (n === 1) delete _fonte.t[_abaAtual];else _fonte.t[_abaAtual] = n;
+  }
+  fonteSalvar();aplicarFonte();
+}
+function fonteReset() {_fonte = { g: 1, t: {} };fonteSalvar();aplicarFonte();}
+function aplicarFonte() {
+  const g = Math.max(_fonte.g, _deviceMode === 'ios' ? 1 : 0.5);
+  document.body.style.zoom = g === 1 ? '' : String(g);
+  document.querySelectorAll('.tab-content').forEach((el) => {
+    const id = el.id.replace('tab-', '');
+    let t = _fonte.t[id] || 1;
+    if (g * t < (_deviceMode === 'ios' ? 1 : 0.5)) t = 1 / g;
+    el.style.zoom = t === 1 ? '' : String(t);
+  });
+  const pg = document.getElementById('fonte-g-pct'),pt = document.getElementById('fonte-t-pct');
+  if (pg) pg.textContent = Math.round(g * 100) + '%';
+  if (pt) pt.textContent = Math.round((_fonte.t[_abaAtual] || 1) * 100) + '%';
+}
+
 function initApp(mode) {
   if (!NOMES_AMBIENTE[mode]) mode = mode === 'mobile' ? 'android' : 'desktop';
   _deviceMode = mode;
+  aplicarFonte();
   document.body.classList.remove('mode-desktop', 'mode-mobile', 'mode-android', 'mode-ios');
   document.body.classList.add('mode-' + mode);
   if (mode !== 'desktop') document.body.classList.add('mode-mobile');
@@ -3767,6 +3840,7 @@ function abrirSelecaoAmbiente() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  fonteLer();aplicarFonte();
   // Default coefficient values
   const setVal = (id, val) => {const el = document.getElementById(id);if (el && !el.value) el.value = val;};
   setVal('cbr_sub', '2');
@@ -4069,7 +4143,7 @@ function abrirAdmin() {
     lista.sort((x, y) => (ordem[estado(x)] === 4 ? -1 : ordem[estado(x)]) - (ordem[estado(y)] === 4 ? -1 : ordem[estado(y)]) || (x.nome || x.usuario).localeCompare(y.nome || y.usuario));
     const rotulo = { adm: 'Administrador', rec: 'Recusado', pen: 'Aguardando aprovação', ven: 'Licença vencida', ok: 'Ativo' };
     const cor = { adm: 'badge-info', rec: 'badge-warn', pen: 'badge-warn', ven: 'badge-warn', ok: 'badge-ok' };
-    let h = '<div class="tabela-rolagem"><table class="lista-nuvem"><tr><th>E-mail</th><th>Nome / Empresa</th><th>Validade</th><th>Situação</th><th></th></tr>';
+    let h = '<div class="tabela-rolagem"><table class="lista-nuvem usuarios-tab"><tr><th>E-mail</th><th>Nome / Empresa</th><th>Validade</th><th>Situação</th><th></th></tr>';
     lista.forEach((u) => {
       const e = estado(u);
       const dt = u.validade ? u.validade.toISOString().slice(0, 10) : '';
@@ -4080,16 +4154,16 @@ function abrirAdmin() {
       if (e === 'rec') acoes = bt('Aprovar', true, false);else
       if (e !== 'adm') acoes = bt('Bloquear', false, false);
       if (!u.uid) {
-        h += '<tr><td>' + escapar(u.email) + '</td><td colspan="2" style="color:var(--fg3)">Administrador da lista oficial</td>' +
-        '<td><span class="badge badge-info">Administrador · nunca entrou</span></td><td><div class="acoes">' + redef + '</div></td></tr>';
+        h += '<tr><td data-l="E-mail">' + escapar(u.email) + '</td><td data-l="Nome / Empresa" colspan="2" style="color:var(--fg3)">Administrador da lista oficial</td>' +
+        '<td data-l="Situação"><span class="badge badge-info">Administrador · nunca entrou</span></td><td data-l="Ações"><div class="acoes">' + redef + '</div></td></tr>';
         return;
       }
-      h += '<tr' + (e === 'pen' ? ' style="background:var(--warn)"' : '') + '><td>' + escapar(u.email || u.usuario) + '</td>' +
-      '<td><input type="text" id="an_' + u.uid + '" value="' + escapar(u.nome) + '" placeholder="nome" style="width:110px"> ' +
+      h += '<tr' + (e === 'pen' ? ' style="background:var(--warn)"' : '') + '><td data-l="E-mail">' + escapar(u.email || u.usuario) + '</td>' +
+      '<td data-l="Nome / Empresa"><input type="text" id="an_' + u.uid + '" value="' + escapar(u.nome) + '" placeholder="nome" style="width:110px"> ' +
       '<input type="text" id="ae_' + u.uid + '" value="' + escapar(u.empresa) + '" placeholder="empresa" style="width:110px"></td>' +
-      '<td>' + (e === 'adm' ? '<span style="color:var(--fg3)">sem prazo</span><input type="hidden" id="av_' + u.uid + '" value="">' : '<input type="date" id="av_' + u.uid + '" value="' + dt + '">') + '</td>' +
-      '<td><span class="badge ' + cor[e] + '">' + rotulo[e] + '</span></td>' +
-      '<td><div class="acoes">' + acoes + redef +
+      '<td data-l="Validade">' + (e === 'adm' ? '<span style="color:var(--fg3)">sem prazo</span><input type="hidden" id="av_' + u.uid + '" value="">' : '<input type="date" id="av_' + u.uid + '" value="' + dt + '">') + '</td>' +
+      '<td data-l="Situação"><span class="badge ' + cor[e] + '">' + rotulo[e] + '</span></td>' +
+      '<td data-l="Ações"><div class="acoes">' + acoes + redef +
       '<button class="tb-btn" onclick="salvarUsuario(\'' + u.uid + '\',null,null)">Gravar</button></div></td></tr>';
     });
     corpoModal(h + '</table></div><p style="font-size:11.5px;color:var(--fg3);margin-top:10px">' +
