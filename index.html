@@ -334,7 +334,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="msg" id="login-msg"></div>
     <div class="rodape">
       Seu cadastro é analisado pelo administrador antes da liberação.<br>
-      Versão 23 · 07/10/2026
+      Versão 24 · 07/10/2026
     </div>
   </div>
 </div>
@@ -957,7 +957,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
         <div><div class="out-cell"><div class="lbl">Bota-Fora (m³)</div><div class="val" id="topo_botafora">—</div></div></div>
       </div>
       <div class="grid4" style="margin-top:10px;">
-        <div><div class="out-cell"><div class="lbl">Área Pavimentada (m²)</div><div class="val" id="topo_area_pav">—</div></div></div>
+        <div><div class="out-cell"><div class="lbl">Área Pavimentada (m²) — plana · com caimento</div><div class="val" id="topo_area_pav">—</div></div></div>
         <div><div class="out-cell"><div class="lbl">Volume CBUQ (m³)</div><div class="val" id="topo_vol_cbuq">—</div></div></div>
         <div><div class="out-cell"><div class="lbl">Volume Base (m³)</div><div class="val" id="topo_vol_base">—</div></div></div>
         <div><div class="out-cell"><div class="lbl">Volume Sub-base (m³)</div><div class="val" id="topo_vol_sb">—</div></div></div>
@@ -967,8 +967,9 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
         <div><div class="out-cell"><div class="lbl">Volume Reforço Subleito (m³)</div><div class="val" id="topo_vol_ref">—</div></div></div>
         <div><div class="out-cell"><div class="lbl">Status Geral</div><div class="val" id="topo_status">—</div></div></div>
       </div>
-    </div>
-  </div>
+ 
+      <p style="font-size:11.5px;color:var(--fg2);margin-top:8px;"><strong>Observação:</strong> não estão considerados nos volumes os coeficientes de empolamento dos materiais. Os volumes das camadas do pavimento usam a área pavimentada plana.</p>
+    </div> </div>
   <div class="tab-export-bar">
     <span class="tb-label">Exportar Topografia:</span>
     <button class="tb-btn tb-btn-excel" onclick="exportarTabExcel('topo')">Excel</button>
@@ -1915,7 +1916,7 @@ function calcTopo() {
     return { i: i, est: n('est') || 0, te: n('te'), tc: n('tc'), td: n('td'),
       gr: n('gr'), larg: n('larg') || 0, na: n('na'),
       form: null, ac: 0, aa: 0, ar: 0, dl: null, vc: null, va: null, vr: null,
-      apav: 0, vcb: null, vbs: null, vsb: null, vrf: null,
+      apav: 0, apavc: 0, vcb: null, vbs: null, vsb: null, vrf: null,
       afna: null, sit: '—', naCritico: false };
   });
 
@@ -1949,6 +1950,9 @@ function calcTopo() {
     A.va = (A.aa + B.aa) / 2 * A.dl;
     A.vr = (A.ar + B.ar) / 2 * A.dl;
     A.apav = (A.larg + B.larg) / 2 * A.dl;
+    // com caimento: cada metade da plataforma é medida ao longo da superfície inclinada
+    const sup = (X) => X.larg / 2 * (Math.sqrt(1 + cEsq * cEsq) + Math.sqrt(1 + cDir * cDir));
+    A.apavc = (sup(A) + sup(B)) / 2 * A.dl;
     A.vcb = A.apav * eRev;
     A.vbs = A.apav * eBas;
     A.vsb = A.apav * eSbs;
@@ -1979,9 +1983,9 @@ function calcTopo() {
   });
 
   // Totais da obra.
-  let totVc = 0,totVa = 0,totVre = 0,apav = 0,vCBUQ = 0,vBase = 0,vSB = 0,vRef = 0;
+  let totVc = 0,totVa = 0,totVre = 0,apav = 0,apavc = 0,vCBUQ = 0,vBase = 0,vSB = 0,vRef = 0;
   linhas.forEach((L) => {
-    totVc += L.vc || 0;totVa += L.va || 0;totVre += L.vr || 0;apav += L.apav || 0;
+    totVc += L.vc || 0;totVa += L.va || 0;totVre += L.vr || 0;apav += L.apav || 0;apavc += L.apavc || 0;
     vCBUQ += L.vcb || 0;vBase += L.vbs || 0;vSB += L.vsb || 0;vRef += L.vrf || 0;
   });
   const extensao = linhas.length > 1 ? linhas[linhas.length - 1].est - linhas[0].est : 0;
@@ -1995,7 +1999,7 @@ function calcTopo() {
   set2('topo_vol_aterro', fmt(totVa, 2) + ' m³');
   set2('topo_botafora', fmt(bota, 2) + ' m³');
   set2('topo_vol_reaterro', fmt(totVre, 2) + ' m³');
-  set2('topo_area_pav', fmt(apav, 2) + ' m²');
+  set2('topo_area_pav', fmt(apav, 2) + ' m²  ·  ' + fmt(apavc, 2) + ' m² c/ caimento');
   set2('topo_vol_cbuq', fmt(vCBUQ, 2) + ' m³');
   set2('topo_vol_base', fmt(vBase, 2) + ' m³');
   set2('topo_vol_sb', fmt(vSB, 2) + ' m³');
@@ -2021,7 +2025,7 @@ function calcTopo() {
   }
   set2('topo_status', geral);
 
-  _R._topo = { totVc: totVc, totVa: totVa, totVre: totVre, semMeioFio: !(_mf && _mf.tipo !== 'nenhum'), totVbf: bota, totVem: empr, areaPav: apav,
+  _R._topo = { totVc: totVc, totVa: totVa, totVre: totVre, semMeioFio: !(_mf && _mf.tipo !== 'nenhum'), totVbf: bota, totVem: empr, areaPav: apav, areaPavInc: apavc,
     volCBUQ: vCBUQ, volBase: vBase, volSB: vSB, volRef: vRef,
     extensao: extensao, afMin: afMin, nCritico: nCrit,
     linhas: linhas, data: linhas };
@@ -2072,11 +2076,13 @@ function topoResumo() {
   ['Reaterro lateral:', m(d.totVre, 'm³')],
   ['Bota-fora:', m(d.totVbf, 'm³')],
   ['Empréstimo:', m(d.totVem, 'm³')],
-  ['Área pavimentada:', m(d.areaPav, 'm²')],
+  ['Área pavimentada (plana):', m(d.areaPav, 'm²')],
+  ['Área pavimentada (com caimento):', m(d.areaPavInc, 'm²')],
   ['Volume de CBUQ:', m(d.volCBUQ, 'm³')],
   ['Volume de base:', m(d.volBase, 'm³')],
   ['Volume de sub-base:', m(d.volSB, 'm³')],
-  ['Volume de reforço:', m(d.volRef, 'm³')]];
+  ['Volume de reforço:', m(d.volRef, 'm³')],
+  ['Observação:', 'Não considera coeficientes de empolamento dos materiais.']];
 
 }
 
@@ -2630,7 +2636,7 @@ function updateMemoria() {
     Volume de Aterro: <strong>${topoR.totVa ? fmt(topoR.totVa, 1) + ' m³' : '—'}</strong><br>
     Reaterro lateral (corte inclinado): <strong>${topoR.totVre ? fmt(topoR.totVre, 1) + ' m³' : '—'}</strong><br>
     Bota-Fora: <strong>${topoR.totVbf ? fmt(topoR.totVbf, 1) + ' m³' : '—'}</strong><br>
-    Área Pavimentada: <strong>${topoR.areaPav ? fmt(topoR.areaPav, 1) + ' m²' : '—'}</strong></p>
+    Área Pavimentada: <strong>${topoR.areaPav ? fmt(topoR.areaPav, 1) + ' m²' : '—'}</strong> (plana) · <strong>${topoR.areaPavInc ? fmt(topoR.areaPavInc, 1) + ' m²' : '—'}</strong> (com caimento)</p>
   </div>
 
   <div class="mem-section">
@@ -3487,7 +3493,7 @@ async function exportarMemoriaPDF() {
     ['Vol. Corte:', R._topo.totVc ? fmt(R._topo.totVc, 1) + ' m³' : '—'],
     ['Vol. Aterro:', R._topo.totVa ? fmt(R._topo.totVa, 1) + ' m³' : '—'],
     ['Bota-Fora:', R._topo.totVbf ? fmt(R._topo.totVbf, 1) + ' m³' : '—'],
-    ['Área Pav.:', R._topo.areaPav ? fmt(R._topo.areaPav, 1) + ' m²' : '—']]
+    ['Área Pav.:', R._topo.areaPav ? fmt(R._topo.areaPav, 1) + ' m² (plana) / ' + fmt(R._topo.areaPavInc, 1) + ' m² (c/ caimento)' : '—']]
     );
   }
 
