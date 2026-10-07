@@ -334,7 +334,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="msg" id="login-msg"></div>
     <div class="rodape">
       Seu cadastro é analisado pelo administrador antes da liberação.<br>
-      Versão 22 · 07/10/2026
+      Versão 23 · 07/10/2026
     </div>
   </div>
 </div>
@@ -844,12 +844,15 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="grid3">
       <div class="field"><label>Inclinação Talude de Corte (H:V)</label>
         <select id="c_talcorte" onchange="calcTopo()">
-          <option value="0">Vertical (corte reto)</option>
-          <option value="0.5">0,5:1 (rocha)</option>
-          <option value="1">1:1</option>
-          <option value="1.5" selected>1,5:1</option>
-          <option value="2">2:1</option>
+          <option value="0" selected>Vertical, sem talude (padrão)</option>
+          <optgroup label="Com talude — só em terreno ruim">
+            <option value="0.5">0,5:1 (rocha)</option>
+            <option value="1">1:1 (45°)</option>
+            <option value="1.5">1,5:1</option>
+            <option value="2">2:1</option>
+          </optgroup>
         </select>
+        <div style="font-size:11px;color:var(--fg3);margin-top:4px">No corte vertical as camadas do pavimento ocupam toda a largura escavada, sem reaterro. Use talude só quando o terreno puder cisalhar ou desmoronar; aí o espaço ao lado do pavimento recebe reaterro.</div>
       </div>
       <div class="field"><label>Inclinação Talude de Aterro (H:V)</label>
         <select id="c_talaterro" onchange="calcTopo()">
@@ -4430,7 +4433,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setVal('k_base', '1.0');
   setVal('k_sb', '1.0');
   setVal('k_r', '1.0');
-  setVal('c_talcorte', '1');
   setVal('c_talaterro', '1.5');
   setVal('c_berma', '1');
   setVal('cbr_base', '80');
