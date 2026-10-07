@@ -173,6 +173,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 #login .alt{background:none;border:none;color:#9cc3ff;font-weight:600;font-size:13.5px;min-height:44px;width:auto;padding:8px 4px;text-decoration:underline;}
 #login .alt:hover{background:none;color:#fff;}
 #login .linha-alt{margin-top:10px;text-align:center;font-size:13px;color:rgba(255,255,255,.7);}
+#login .esqueci{text-align:right;margin:-6px 0 10px;}
+#login .esqueci .alt{font-size:12.5px;min-height:32px;padding:4px 0;}
 #login .dica{font-size:11.5px;color:rgba(255,255,255,.6);margin:-8px 0 14px;}
 #login .rodape{font-size:11.5px;color:rgba(255,255,255,.55);margin-top:22px;line-height:1.5;}
 .sessao-bar{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--nav-fg);}
@@ -280,6 +282,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
       <input type="email" id="log_usuario" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="seu e-mail">
       <label for="log_senha">Senha</label>
       <input type="password" id="log_senha" autocomplete="current-password" placeholder="sua senha">
+      <div class="esqueci"><button type="button" class="alt" id="btn-esqueci">Esqueci minha senha</button></div>
       <button type="submit" id="btn-entrar">Entrar</button>
       <div class="linha-alt">Ainda não tem conta? <button type="button" class="alt" id="ir-cadastro">Criar conta</button></div>
     </form>
@@ -1206,6 +1209,24 @@ Nuvem.cadastrar = async function(nome, empresa, email, senha){
     if(/operation-not-allowed/.test(c)) throw new Error('Cadastro por e-mail e senha não está ativado no Firebase.');
     if(/unauthorized-domain/.test(c)) throw new Error('Este endereço não está autorizado no Firebase (Authentication › Settings › Authorized domains).');
     throw new Error('Não foi possível criar a conta: ' + (e.message || c));
+  }
+};
+
+Nuvem.redefinirSenha = async function(email){
+  if(!Nuvem.disponivel) throw new Error('Nuvem não configurada.');
+  const {a, auth} = Nuvem._fb;
+  const em = emailDeUsuario(email);
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) throw new Error('Digite seu e-mail no campo acima e toque de novo em "Esqueci minha senha".');
+  try{
+    await auth.sendPasswordResetEmail(a, em);
+  }catch(e){
+    const c = (e && e.code) || '';
+    if(/user-not-found/.test(c)) return;      // não revela se o e-mail existe
+    if(/invalid-email/.test(c)) throw new Error('E-mail inválido.');
+    if(/too-many-requests/.test(c)) throw new Error('Muitas tentativas. Aguarde alguns minutos e tente de novo.');
+    if(/network/.test(c)) throw new Error('Sem conexão com o servidor. Verifique a internet.');
+    if(/unauthorized-domain/.test(c)) throw new Error('Este endereço não está autorizado no Firebase (Authentication › Settings › Authorized domains).');
+    throw new Error('Não foi possível enviar o e-mail: ' + (e.message || c));
   }
 };
 
@@ -3712,7 +3733,14 @@ document.addEventListener('click', (ev) => {
   const t = ev.target && ev.target.id;
   if (t === 'ir-cadastro') {msgLogin('');mostrarFormLogin('cadastro');const c = document.getElementById('cad_nome');if (c && _deviceMode === 'desktop') c.focus();} else
   if (t === 'ir-login') {msgLogin('');mostrarFormLogin('login');} else
-  if (t === 'btn-sair-espera') {sairDaConta();}
+  if (t === 'btn-sair-espera') {sairDaConta();} else
+  if (t === 'btn-esqueci') {
+    const em = (document.getElementById('log_usuario') || {}).value || '';
+    msgLogin('Enviando…', 'info');
+    window.Nuvem.redefinirSenha(em).
+    then(() => msgLogin('Se este e-mail tem cadastro, enviamos um link para criar uma nova senha. Confira também a caixa de spam.', 'info')).
+    catch((e) => msgLogin(e && e.message || 'Não foi possível enviar o e-mail.', 'erro'));
+  }
 });
 
 /* ---------------- Janela auxiliar ---------------- */
