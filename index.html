@@ -334,7 +334,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="msg" id="login-msg"></div>
     <div class="rodape">
       Seu cadastro é analisado pelo administrador antes da liberação.<br>
-      Versão 24 · 07/10/2026
+      Versão 25 · 07/10/2026
     </div>
   </div>
 </div>
@@ -936,10 +936,10 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
           <th>Corte (m³)</th>
           <th>Aterro (m³)</th>
           <th>Reaterro (m³)</th>
-          <th>CBUQ (m³)</th>
-          <th>Base (m³)</th>
-          <th>Sub-base (m³)</th>
-          <th>Reforço (m³)</th>
+          <th>CBUQ (m³) plano · c/ caimento</th>
+          <th>Base (m³) plano · c/ caimento</th>
+          <th>Sub-base (m³) plano · c/ caimento</th>
+          <th>Reforço (m³) plano · c/ caimento</th>
           <th>Afast. N.A. (m)</th>
           <th>Status</th>
           <th></th>
@@ -968,7 +968,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
         <div><div class="out-cell"><div class="lbl">Status Geral</div><div class="val" id="topo_status">—</div></div></div>
       </div>
  
-      <p style="font-size:11.5px;color:var(--fg2);margin-top:8px;"><strong>Observação:</strong> não estão considerados nos volumes os coeficientes de empolamento dos materiais. Os volumes das camadas do pavimento usam a área pavimentada plana.</p>
+      <p style="font-size:11.5px;color:var(--fg2);margin-top:8px;"><strong>Observação:</strong> não estão considerados nos volumes os coeficientes de empolamento dos materiais. Nos volumes das camadas do pavimento, o primeiro valor usa a área plana e o segundo, a área com o caimento transversal.</p>
     </div> </div>
   <div class="tab-export-bar">
     <span class="tb-label">Exportar Topografia:</span>
@@ -1957,6 +1957,7 @@ function calcTopo() {
     A.vbs = A.apav * eBas;
     A.vsb = A.apav * eSbs;
     A.vrf = A.apav * eRfc;
+    A.cc = { cb: A.apavc * eRev, bs: A.apavc * eBas, sb: A.apavc * eSbs, rf: A.apavc * eRfc }; // com caimento
   }
 
   // Escrita das células.
@@ -1974,10 +1975,10 @@ function calcTopo() {
     set('tp_vc_' + L.i, L.vc === null ? '—' : fmt(L.vc, 2));
     set('tp_va_' + L.i, L.va === null ? '—' : fmt(L.va, 2));
     set('tp_vr_' + L.i, L.vr === null ? '—' : fmt(L.vr, 2));
-    set('tp_vcb_' + L.i, L.vcb === null ? '—' : fmt(L.vcb, 2));
-    set('tp_vbs_' + L.i, L.vbs === null ? '—' : fmt(L.vbs, 2));
-    set('tp_vsb_' + L.i, L.vsb === null ? '—' : fmt(L.vsb, 2));
-    set('tp_vrf_' + L.i, L.vrf === null ? '—' : fmt(L.vrf, 2));
+    set('tp_vcb_' + L.i, L.vcb === null ? '—' : fmt(L.vcb, 2) + ' · ' + fmt(L.cc.cb, 2));
+    set('tp_vbs_' + L.i, L.vbs === null ? '—' : fmt(L.vbs, 2) + ' · ' + fmt(L.cc.bs, 2));
+    set('tp_vsb_' + L.i, L.vsb === null ? '—' : fmt(L.vsb, 2) + ' · ' + fmt(L.cc.sb, 2));
+    set('tp_vrf_' + L.i, L.vrf === null ? '—' : fmt(L.vrf, 2) + ' · ' + fmt(L.cc.rf, 2));
     set('tp_afna_' + L.i, L.afna === null ? '—' : fmt(L.afna, 2), L.naCritico);
     set('tp_sit_' + L.i, L.naCritico ? L.sit + ' · N.A. crítico' : L.sit, L.naCritico);
   });
@@ -2000,10 +2001,12 @@ function calcTopo() {
   set2('topo_botafora', fmt(bota, 2) + ' m³');
   set2('topo_vol_reaterro', fmt(totVre, 2) + ' m³');
   set2('topo_area_pav', fmt(apav, 2) + ' m²  ·  ' + fmt(apavc, 2) + ' m² c/ caimento');
-  set2('topo_vol_cbuq', fmt(vCBUQ, 2) + ' m³');
-  set2('topo_vol_base', fmt(vBase, 2) + ' m³');
-  set2('topo_vol_sb', fmt(vSB, 2) + ' m³');
-  set2('topo_vol_ref', fmt(vRef, 2) + ' m³');
+  const eR_ = (_R.e_ref || 0) / 100,eB_ = (_R.e_base || 0) / 100,eS_ = (_R.e_sb || 0) / 100,eF_ = (_R.e_r || 0) / 100;
+  const dois = (a, e) => fmt(a, 2) + ' m³  ·  ' + fmt(apavc * e, 2) + ' m³ c/ caimento';
+  set2('topo_vol_cbuq', dois(vCBUQ, eR_));
+  set2('topo_vol_base', dois(vBase, eB_));
+  set2('topo_vol_sb', dois(vSB, eS_));
+  set2('topo_vol_ref', dois(vRef, eF_));
   set2('topo_espessura', _R.e_total ? fmt(_R.e_total, 1) + ' cm' : '—');
 
   // Estrutura de referência, vinda do Dimensionamento.
@@ -2027,6 +2030,7 @@ function calcTopo() {
 
   _R._topo = { totVc: totVc, totVa: totVa, totVre: totVre, semMeioFio: !(_mf && _mf.tipo !== 'nenhum'), totVbf: bota, totVem: empr, areaPav: apav, areaPavInc: apavc,
     volCBUQ: vCBUQ, volBase: vBase, volSB: vSB, volRef: vRef,
+    volCBUQc: apavc * eR_, volBasec: apavc * eB_, volSBc: apavc * eS_, volRefc: apavc * eF_,
     extensao: extensao, afMin: afMin, nCritico: nCrit,
     linhas: linhas, data: linhas };
   const tabC = document.getElementById('tab-corte');
@@ -2078,10 +2082,14 @@ function topoResumo() {
   ['Empréstimo:', m(d.totVem, 'm³')],
   ['Área pavimentada (plana):', m(d.areaPav, 'm²')],
   ['Área pavimentada (com caimento):', m(d.areaPavInc, 'm²')],
-  ['Volume de CBUQ:', m(d.volCBUQ, 'm³')],
-  ['Volume de base:', m(d.volBase, 'm³')],
-  ['Volume de sub-base:', m(d.volSB, 'm³')],
-  ['Volume de reforço:', m(d.volRef, 'm³')],
+  ['Volume de CBUQ (plano):', m(d.volCBUQ, 'm³')],
+  ['Volume de CBUQ (com caimento):', m(d.volCBUQc, 'm³')],
+  ['Volume de base (plano):', m(d.volBase, 'm³')],
+  ['Volume de base (com caimento):', m(d.volBasec, 'm³')],
+  ['Volume de sub-base (plano):', m(d.volSB, 'm³')],
+  ['Volume de sub-base (com caimento):', m(d.volSBc, 'm³')],
+  ['Volume de reforço (plano):', m(d.volRef, 'm³')],
+  ['Volume de reforço (com caimento):', m(d.volRefc, 'm³')],
   ['Observação:', 'Não considera coeficientes de empolamento dos materiais.']];
 
 }
@@ -2643,7 +2651,8 @@ function updateMemoria() {
     <h3>11. Volumes de Pavimentação</h3>
     <p>Volume CBUQ: <strong>${topoR.volCBUQ ? fmt(topoR.volCBUQ, 2) + ' m³' : '—'}</strong><br>
     Volume Base: <strong>${topoR.volBase ? fmt(topoR.volBase, 2) + ' m³' : '—'}</strong><br>
-    Volume Sub-base: <strong>${topoR.volSB ? fmt(topoR.volSB, 2) + ' m³' : '—'}</strong></p>
+    Volume Sub-base: <strong>${topoR.volSB ? fmt(topoR.volSB, 2) + ' m³' : '—'}</strong><br>
+    <em>Com o caimento transversal:</em> CBUQ <strong>${fmt(topoR.volCBUQc, 2)} m³</strong> · Base <strong>${fmt(topoR.volBasec, 2)} m³</strong> · Sub-base <strong>${fmt(topoR.volSBc, 2)} m³</strong></p>
   </div>
 
   <div class="mem-section">
