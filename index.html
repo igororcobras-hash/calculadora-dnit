@@ -334,7 +334,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="msg" id="login-msg"></div>
     <div class="rodape">
       Seu cadastro é analisado pelo administrador antes da liberação.<br>
-      Versão 19 · 07/10/2026
+      Versão 20 · 07/10/2026
     </div>
   </div>
 </div>
@@ -402,11 +402,12 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
   <button type="button" class="tb-btn" onclick="fonteAba(-1)" aria-label="Diminuir o texto desta aba">A−</button><button type="button" class="tb-btn" id="fonte-t-pct" onclick="fonteAba(0)" title="Voltar ao tamanho normal nesta aba">100%</button><button type="button" class="tb-btn" onclick="fonteAba(1)" aria-label="Aumentar o texto desta aba">A+</button></span>
   <span class="tb-sep"></span>
   <span class="tb-label">Projeto:</span>
+  <button class="tb-btn" onclick="novoCalculo()" title="Começa um cálculo em branco">Novo cálculo</button>
   <button class="tb-btn tb-btn-save" onclick="salvarProjeto()" title="Salva os dados do projeto em arquivo .json">Salvar projeto</button>
-  <button class="tb-btn" onclick="document.getElementById('imp').click()" title="Abre um projeto salvo (.json)">Abrir projeto</button>
+  <button class="tb-btn" onclick="abrirProjetoMenu()" title="Abre um projeto salvo (.json, .xlsx, .docx, .pdf) ou um dos recentes">Abrir projeto</button>
   <button class="tb-btn tb-nuvem" onclick="salvarNaNuvem()" hidden title="Salva este projeto na nuvem">Salvar na nuvem</button>
   <button class="tb-btn tb-nuvem" onclick="abrirDaNuvem()" hidden title="Abre um projeto salvo na nuvem">Abrir da nuvem</button>
-  <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importarProjeto(event)">
+  <input type="file" id="imp" accept=".json,application/json,.xlsx,.xlsm,.docx,.pdf" style="display:none" onchange="importarArquivo(event)">
   <span class="tb-sep"></span>
   <span class="tb-label">Exportar memória:</span>
   <button class="tb-btn tb-btn-excel" onclick="exportarMemoriaExcel()">Excel</button>
@@ -2525,6 +2526,7 @@ function salvarProjeto() {var _document$getElementB7;
   };
   const blob = new Blob([JSON.stringify(proj, null, 2)], { type: 'application/json' });
   triggerDownload(blob, 'pavimento_projeto.json');
+  try {registrarRecente(dadosDoProjeto(), nomeDoProjeto(proj, 'pavimento_projeto.json'));_sujo = false;} catch (e) {}
 }
 
 /* Aplica um projeto (de arquivo .json ou da nuvem) aos campos da calculadora */
@@ -2655,7 +2657,7 @@ function exportarMemoriaExcel() {var _R$_topo4;
     const wsT = XLSX.utils.aoa_to_sheet([...topoResumo(), [''], topoCabecalho(), ...topoLinhas()]);
     XLSX.utils.book_append_sheet(wb, wsT, 'Topografia');
   }
-  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  anexarProjetoXlsx(wb);const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   triggerDownload(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'pavimento_memoria_calculo.xlsx');
 }
 
@@ -3169,7 +3171,9 @@ function htmlParaDocx(html) {
   { nome: 'word/_rels/document.xml.rels', texto: _XMLH + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
     `<Relationship Id="rIdEstilos" Type="${R}/styles" Target="styles.xml"/>` +
     `<Relationship Id="rIdConfig" Type="${R}/settings" Target="settings.xml"/>` +
-    `<Relationship Id="rIdRodape" Type="${R}/footer" Target="footer1.xml"/></Relationships>` },
+    `<Relationship Id="rIdRodape" Type="${R}/footer" Target="footer1.xml"/>` +
+    `<Relationship Id="rIdProj" Type="${R}/customXml" Target="../customXml/item1.xml"/></Relationships>` },
+  { nome: 'customXml/item1.xml', texto: _XMLH + '<pavimento xmlns="urn:calc-pavimento">' + _xml(projetoMarcado()) + '</pavimento>' },
   { nome: 'word/document.xml', texto: documento },
   { nome: 'word/styles.xml', texto: _estilosXml() },
   { nome: 'word/settings.xml', texto: _XMLH + `<w:settings ${_W}><w:defaultTabStop w:val="708"/><w:characterSpacingControl w:val="doNotCompress"/>` +
@@ -3213,6 +3217,7 @@ async function exportarMemoriaPDF() {
   }
   const { jsPDF: J } = window.jspdf || { jsPDF };
   const doc = pdfSeguro(new J({ orientation: 'p', unit: 'mm', format: 'a4' }));
+  try {doc.setProperties({ keywords: projetoMarcado() });} catch (e) {}
   const R = _R;const sc = SCENARIOS[selectedScenario];
   const hoje = new Date().toLocaleDateString('pt-BR');
   let y = 20;
@@ -3386,7 +3391,7 @@ function exportarTabExcel(tab) {
   ws['!cols'] = [{ wch: 38 }, { wch: 28 }, { wch: 16 }];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
-  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  anexarProjetoXlsx(wb);const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   triggerDownload(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), fname);
 }
 
@@ -3523,6 +3528,7 @@ async function exportarTabPDF(tab) {
   const { jsPDF: J } = window.jspdf || { jsPDF };
   const R = _R;const sc = SCENARIOS[selectedScenario];
   const doc = pdfSeguro(new J({ orientation: 'p', unit: 'mm', format: 'a4' }));
+  try {doc.setProperties({ keywords: projetoMarcado() });} catch (e) {}
   let y = 20;const lm = 15,rm = 195;
   const hoje = new Date().toLocaleDateString('pt-BR');
 
@@ -3734,7 +3740,7 @@ async function exportarTudo() {
     if ((_R$_topo5 = _R._topo) != null && (_R$_topo5 = _R$_topo5.linhas) != null && _R$_topo5.length) {
       addSheet([...topoResumo(), [''], topoCabecalho(), ...topoLinhas()], 'Topografia');
     }
-    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    anexarProjetoXlsx(wb);const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     await triggerDownload(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'pavimento_projeto_completo.xlsx');
     await new Promise((r) => setTimeout(r, 500));
   }
@@ -3820,6 +3826,360 @@ function aplicarFonte() {
   if (pt) pt.textContent = Math.round((_fonte.t[_abaAtual] || 1) * 100) + '%';
 }
 
+/* ============================================================
+   PROJETO — NOVO CÁLCULO, RECENTES E IMPORTAÇÃO DE ARQUIVOS
+
+   Os arquivos exportados por esta calculadora (Excel, Word e PDF)
+   levam o projeto inteiro gravado dentro deles:
+     Excel → planilha oculta "dados_projeto"
+     Word  → parte customXml (não aparece no texto)
+     PDF   → campo "Palavras-chave" das propriedades
+   Ao importar, esses dados são lidos com exatidão. Arquivos
+   exportados por versões antigas (sem esses dados) são lidos pelos
+   rótulos do texto, e uma tela mostra o que foi reconhecido.
+   ============================================================ */
+const PROJ_MARCA = 'PAVPROJ1:';
+let _sujo = false; // há alteração ainda não salva?
+let _projetoPadrao = null; // valores iniciais, para "Novo cálculo"
+let _continuacao = null; // o que fazer depois da pergunta "salvar antes?"
+let _importacao = null; // arquivo lido, aguardando confirmação
+
+document.addEventListener('input', (ev) => {
+  if (!ev.target || !ev.target.closest || ev.target.type === 'file' || ev.target.closest('#modal, #login')) return;
+  _sujo = true;
+});
+
+function b64DeTexto(t) {return btoa(unescape(encodeURIComponent(t)));}
+function textoDeB64(b) {return decodeURIComponent(escape(atob(b)));}
+function projetoMarcado() {return PROJ_MARCA + b64DeTexto(JSON.stringify(dadosDoProjeto()));}
+function projetoDeMarca(t) {
+  const i = String(t || '').indexOf(PROJ_MARCA);
+  if (i < 0) return null;
+  const m = String(t).slice(i + PROJ_MARCA.length).match(/^[A-Za-z0-9+/=]+/);
+  if (!m) return null;
+  try {const p = JSON.parse(textoDeB64(m[0]));return p && typeof p === 'object' ? p : null;} catch (e) {return null;}
+}
+
+/* Planilha oculta com o projeto, para o Excel. */
+function anexarProjetoXlsx(wb) {
+  try {
+    const t = projetoMarcado(),partes = [];
+    for (let i = 0; i < t.length; i += 30000) partes.push([t.slice(i, i + 30000)]);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(partes), 'dados_projeto');
+    wb.Workbook = wb.Workbook || {};
+    wb.Workbook.Sheets = wb.SheetNames.map((n) => ({ Hidden: n === 'dados_projeto' ? 1 : 0 }));
+  } catch (e) {}
+}
+
+/* ---------- leitura de ZIP (docx) ---------- */
+async function zipEntradas(buf) {
+  const u = new Uint8Array(buf),dv = new DataView(buf);
+  let e = u.length - 22;
+  while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+  if (e < 0) throw new Error('Arquivo Word inválido.');
+  const n = dv.getUint16(e + 10, true);let p = dv.getUint32(e + 16, true);
+  const out = {},dec = new TextDecoder();
+  for (let i = 0; i < n; i++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const metodo = dv.getUint16(p + 10, true),tam = dv.getUint32(p + 20, true);
+    const nl = dv.getUint16(p + 28, true),xl = dv.getUint16(p + 30, true),cl = dv.getUint16(p + 32, true);
+    const lho = dv.getUint32(p + 42, true);
+    const nome = dec.decode(u.subarray(p + 46, p + 46 + nl));
+    p += 46 + nl + xl + cl;
+    const ln = dv.getUint16(lho + 26, true),lx = dv.getUint16(lho + 28, true);
+    const ini = lho + 30 + ln + lx;
+    out[nome] = { metodo: metodo, dados: u.subarray(ini, ini + tam) };
+  }
+  return out;
+}
+async function zipTexto(ent) {
+  if (!ent) return '';
+  if (ent.metodo === 0) return new TextDecoder().decode(ent.dados);
+  const ds = new DecompressionStream('deflate-raw');
+  return await new Response(new Blob([ent.dados]).stream().pipeThrough(ds)).text();
+}
+
+/* ---------- extração de pares "rótulo → valor" ---------- */
+const _desescapaXml = (t) => t.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
+function paresDeLinhas(linhas) {
+  const pares = [];
+  linhas.forEach((l) => {
+    if (l.length >= 2 && String(l[0]).trim() && String(l[1]).trim()) pares.push([String(l[0]).trim(), String(l[1]).trim()]);else
+    if (l.length === 1) {
+      const m = String(l[0]).match(/^([^:]{2,60}):\s*(.+)$/);
+      if (m) pares.push([m[1].trim(), m[2].trim()]);
+    }
+  });
+  return pares;
+}
+function linhasDeDocx(xml) {
+  const linhas = [];
+  const tx = (s) => {const r = [];s.replace(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g, (_, t) => {r.push(_desescapaXml(t));return '';});return r.join('');};
+  const semTab = xml.replace(/<w:tbl>[\s\S]*?<\/w:tbl>/g, (m) => {
+    (m.match(/<w:tr[ >][\s\S]*?<\/w:tr>/g) || []).forEach((tr) => {
+      linhas.push((tr.match(/<w:tc>[\s\S]*?<\/w:tc>/g) || []).map(tx));
+    });
+    return '';
+  });
+  (semTab.match(/<w:p[ >][\s\S]*?<\/w:p>/g) || []).forEach((p) => {const t = tx(p);if (t.trim()) linhas.push([t]);});
+  return linhas;
+}
+function textosDePdf(bin) {
+  const out = [],re = /\(((?:\\.|[^\\)])*)\)\s*Tj/g;let m;
+  while (m = re.exec(bin)) {
+    out.push(m[1].replace(/\\([nrtbf()\\])/g, (_, c) => ({ n: '\n', r: '\r', t: '\t', b: '\b', f: '\f' })[c] || c).
+    replace(/\\([0-7]{1,3})/g, (_, o) => String.fromCharCode(parseInt(o, 8))));
+  }
+  return out;
+}
+
+/* ---------- conversão de valores ---------- */
+function numeroBR(t) {
+  if (t === null || t === undefined) return NaN;
+  let s = String(t).replace(/[^\d,.\-×x⁰¹²³⁴⁵⁶⁷⁸⁹^e]/g, '');
+  const sup = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+  const m = s.match(/^([\d.,]+)[×x]10([⁰¹²³⁴⁵⁶⁷⁸⁹]+|\^?\d+)$/);
+  if (m) {
+    const mant = parseFloat(m[1].replace(/\./g, '').replace(',', '.'));
+    const exp = parseInt(m[2].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (c) => sup.indexOf(c)).replace('^', ''), 10);
+    return mant * Math.pow(10, exp);
+  }
+  s = s.replace(/[^\d,.\-]/g, '');
+  if (s.indexOf(',') >= 0) s = s.replace(/\./g, '').replace(',', '.');
+  return parseFloat(s);
+}
+const semAcento = (t) => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+/* ---------- reconhecimento por rótulos (arquivos sem os dados gravados) ---------- */
+function reconhecerPorRotulos(pares, tabelaTopo) {
+  const base = JSON.parse(JSON.stringify(_projetoPadrao || dadosDoProjeto()));
+  base.ident = { logradouro: '', trecho: '', responsavel: '' };
+  const rec = [],usados = {};
+  const marca = (campo, valor) => {if (!usados[campo]) {usados[campo] = 1;rec.push([campo, valor]);}};
+  pares.forEach(([rot, val]) => {
+    const r = semAcento(rot).replace(/\(.*?\)/g, '').replace(/[:*]/g, '').replace(/\s+/g, ' ').trim();
+    const num = numeroBR(val),ok = !isNaN(num);
+    if (r === 'logradouro' && val !== '—') {base.ident.logradouro = val;marca('Logradouro', val);} else
+    if (r === 'trecho' && val !== '—') {base.ident.trecho = val;marca('Trecho', val);} else
+    if (r === 'responsavel' && val !== '—') {base.ident.responsavel = val;marca('Responsável', val);} else
+    if (r === 'cbr subleito' && ok) {base.cbr.cbr_sub = num;marca('CBR do subleito (%)', num);} else
+    if (r === 'cbr base' && ok) {base.cbr.cbr_base = num;marca('CBR da base (%)', num);} else
+    if ((r === 'cbr sub-base' || r === 'cbr sub base') && ok) {base.cbr.cbr_sb = num;marca('CBR da sub-base (%)', num);} else
+    if (r === 'k revestimento' && ok) {base.k.k_ref = num;marca('K do revestimento', num);} else
+    if (r === 'k base' && ok) {base.k.k_base = num;marca('K da base', num);} else
+    if ((r === 'k sub-base' || r === 'k sub base') && ok) {base.k.k_sb = num;marca('K da sub-base', num);} else
+    if (r === 'k reforco' && ok) {base.k.k_r = num;marca('K do reforço', num);} else
+    if (r === 'n adotado' && ok && num > 0) {
+      let idx = SCENARIOS.findIndex((s) => s.n && Math.abs(s.n - num) / s.n < 0.006);
+      if (idx < 0) idx = 7;
+      base.numN = { selectedScenario: idx, N_adotado: num, customN: idx === 7 ? String(Math.round(num)) : '' };
+      marca('Número N', fmtN(num));
+    }
+  });
+  if (tabelaTopo && tabelaTopo.length) {
+    const linhaCab = tabelaTopo.findIndex((l) => l.some((c) => /^estaca/i.test(String(c).trim())));
+    if (linhaCab >= 0) {
+      const cab = tabelaTopo[linhaCab].map((c) => semAcento(c).replace(/\s*\(.*?\)\s*/g, '').trim());
+      const col = (nome) => cab.indexOf(nome);
+      const ci = { est: col('estaca'), te: col('terreno esq.'), tc: col('terreno eixo'), td: col('terreno dir.'),
+        gr: col('greide eixo'), larg: col('largura'), na: col('cota n.a.') };
+      if (ci.est >= 0 && ci.tc >= 0 && ci.gr >= 0) {
+        const rows = [];
+        for (let i = linhaCab + 1; i < tabelaTopo.length; i++) {
+          const l = tabelaTopo[i],g = (k) => ci[k] >= 0 && l[ci[k]] !== undefined && l[ci[k]] !== '' ? numeroBR(l[ci[k]]) : '';
+          if (isNaN(parseFloat(l[ci.est]))) break;
+          rows.push({ est: g('est'), te: g('te'), tc: g('tc'), td: g('td'), gr: g('gr'), larg: g('larg'), na: g('na') });
+        }
+        if (rows.length) {base.topo = { rows: rows };marca('Topografia', rows.length + (rows.length > 1 ? ' estacas' : ' estaca'));}
+      }
+    }
+  }
+  return { dados: base, reconhecidos: rec };
+}
+
+/* ---------- leitura de um arquivo escolhido ---------- */
+async function lerArquivoProjeto(file) {
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (ext === 'json') {
+    const p = JSON.parse(await file.text());
+    return { dados: p, exato: true, nome: file.name };
+  }
+  const buf = await file.arrayBuffer();
+  if (ext === 'xlsx' || ext === 'xlsm' || ext === 'xls') {
+    if (typeof XLSX === 'undefined') throw new Error('Biblioteca de planilhas não carregada. Verifique a internet e recarregue a página.');
+    const wb = XLSX.read(buf, { type: 'array' });
+    if (wb.Sheets['dados_projeto']) {
+      const partes = XLSX.utils.sheet_to_json(wb.Sheets['dados_projeto'], { header: 1 }).map((l) => l[0] || '');
+      const p = projetoDeMarca(partes.join(''));
+      if (p) return { dados: p, exato: true, nome: file.name };
+    }
+    let pares = [],topo = null;
+    wb.SheetNames.forEach((n) => {
+      const linhas = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: false, defval: '' });
+      pares = pares.concat(paresDeLinhas(linhas));
+      if (!topo && /topografia/i.test(n)) topo = linhas;
+    });
+    return Object.assign({ exato: false, nome: file.name }, reconhecerPorRotulos(pares, topo));
+  }
+  if (ext === 'docx') {
+    const z = await zipEntradas(buf);
+    const nomeCx = Object.keys(z).find((n) => /^customXml\/item\d+\.xml$/.test(n));
+    if (nomeCx) {
+      const p = projetoDeMarca(_desescapaXml(await zipTexto(z[nomeCx])));
+      if (p) return { dados: p, exato: true, nome: file.name };
+    }
+    const xml = await zipTexto(z['word/document.xml']);
+    if (!xml) throw new Error('Não encontrei o texto do documento Word.');
+    const linhas = linhasDeDocx(xml);
+    const pares = paresDeLinhas(linhas),corpo = linhas.map((l) => l.join(' ')).join('\n');
+    let m;
+    if (m = corpo.match(/para a via (.+?), trecho (.+?)\.\s/)) {pares.push(['Logradouro', m[1]], ['Trecho', m[2]]);} else
+    if (m = corpo.match(/para a via (.+?)\.\s/)) pares.push(['Logradouro', m[1]]);
+    if (m = corpo.match(/N\s*=\s*([\d.,]+\s*×\s*10[⁰¹²³⁴⁵⁶⁷⁸⁹]+|[\d.,]+)/)) pares.push(['N adotado', m[1].replace(/\s/g, '')]);
+    return Object.assign({ exato: false, nome: file.name }, reconhecerPorRotulos(pares, null));
+  }
+  if (ext === 'pdf') {
+    let bin = '';
+    const u = new Uint8Array(buf);
+    for (let i = 0; i < u.length; i += 8192) bin += String.fromCharCode.apply(null, u.subarray(i, i + 8192));
+    const p = projetoDeMarca(bin);
+    if (p) return { dados: p, exato: true, nome: file.name };
+    const t = textosDePdf(bin),pares = [];
+    for (let i = 0; i < t.length - 1; i++) if (/:\s*$/.test(t[i])) {pares.push([t[i], t[i + 1]]);i++;}
+    if (!pares.length) throw new Error('Não consegui ler o texto deste PDF. Ele precisa ter sido exportado por esta calculadora.');
+    return Object.assign({ exato: false, nome: file.name }, reconhecerPorRotulos(pares, null));
+  }
+  throw new Error('Formato não suportado. Use .json, .xlsx, .docx ou .pdf.');
+}
+
+/* ---------- recentes ---------- */
+function recentesLer() {try {const l = JSON.parse(localStorage.getItem('pavRecentes') || '[]');return Array.isArray(l) ? l : [];} catch (e) {return [];}}
+function recentesGravar(l) {try {localStorage.setItem('pavRecentes', JSON.stringify(l));} catch (e) {}}
+function nomeDoProjeto(d, padrao) {
+  const i = d && d.ident || {};
+  const n = (i.logradouro || '') + (i.trecho ? ' — ' + i.trecho : '');
+  return n.trim() || padrao || 'Projeto sem nome';
+}
+function registrarRecente(dados, nome) {
+  try {
+    const txt = JSON.stringify(dados);
+    if (txt.length > 250000) return;
+    const lista = recentesLer().filter((r) => r.nome !== nome);
+    lista.unshift({ nome: nome, quando: new Date().toISOString(), dados: dados });
+    recentesGravar(lista.slice(0, 8));
+  } catch (e) {}
+}
+
+/* ---------- abrir / novo / salvar antes ---------- */
+function abrirProjetoMenu() {
+  abrirModal('Abrir projeto', 'Arquivos do seu aparelho ou da nuvem.');
+  const rec = recentesLer();
+  let h = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">' +
+  '<button type="button" class="tb-btn tb-btn-save" onclick="document.getElementById(\'imp\').click()">Procurar arquivo…</button>' + (
+  window.Nuvem && window.Nuvem.usuario && window.Nuvem.usuario.liberado ? '<button type="button" class="tb-btn" onclick="abrirDaNuvem()">Abrir da nuvem</button>' : '') +
+  '</div><p style="font-size:11.5px;color:var(--fg3);margin-top:6px;">Aceita .json, .xlsx, .docx e .pdf exportados por esta calculadora.</p>' +
+  '<h3 style="font-size:13px;margin:16px 0 4px;">Abertos recentemente</h3>';
+  if (!rec.length) h += '<p style="font-size:12.5px;color:var(--fg3);">Nenhum projeto aberto ainda neste aparelho.</p>';else
+  {
+    h += '<table class="lista-nuvem"><tr><th>Projeto</th><th>Quando</th><th></th></tr>';
+    rec.forEach((r, i) => {
+      const d = new Date(r.quando),z = (n) => String(n).padStart(2, '0');
+      h += '<tr><td>' + escapar(r.nome) + '</td><td>' + z(d.getDate()) + '/' + z(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + z(d.getHours()) + ':' + z(d.getMinutes()) + '</td>' +
+      '<td style="white-space:nowrap"><button class="tb-btn" onclick="abrirRecente(' + i + ')">Abrir</button> ' +
+      '<button class="tb-btn" onclick="removerRecente(' + i + ')" title="Tirar da lista" aria-label="Tirar da lista">✕</button></td></tr>';
+    });
+    h += '</table>';
+  }
+  corpoModal(h);
+}
+function abrirRecente(i) {
+  const r = recentesLer()[i];
+  if (!r) return;
+  abrirDadosProjeto(r.dados, r.nome);
+}
+function removerRecente(i) {
+  const l = recentesLer();l.splice(i, 1);recentesGravar(l);abrirProjetoMenu();
+}
+
+function aplicarEAvisar(dados, nome, msg) {
+  aplicarProjeto(dados);
+  _projetoNuvemId = null;_sujo = false;
+  registrarRecente(dados, nome);
+  fecharModal();
+  avisar(msg || 'Projeto aberto: ' + nome + '.');
+}
+/* Abre dados de um projeto, perguntando antes se há alteração não salva. */
+function abrirDadosProjeto(dados, nome, msg) {
+  const seguir = () => aplicarEAvisar(dados, nome, msg);
+  if (_sujo) perguntarSalvarAntes('Abrir ' + nome, seguir);else seguir();
+}
+
+async function importarArquivo(ev) {
+  const file = ev.target.files[0];
+  ev.target.value = '';
+  if (!file) return;
+  try {
+    const r = await lerArquivoProjeto(file);
+    if (r.exato) {
+      abrirDadosProjeto(r.dados, nomeDoProjeto(r.dados, file.name));
+      return;
+    }
+    if (!r.reconhecidos.length) throw new Error('Não encontrei variáveis conhecidas neste arquivo. Ele precisa ter sido exportado por esta calculadora.');
+    _importacao = r;
+    abrirModal('Importar ' + file.name, 'Este arquivo não traz os dados gravados. Li o texto e reconheci as variáveis abaixo. Confira antes de preencher.');
+    let h = '<table class="lista-nuvem"><tr><th>Variável</th><th>Valor lido</th></tr>' +
+    r.reconhecidos.map((x) => '<tr><td>' + escapar(x[0]) + '</td><td>' + escapar(String(x[1])) + '</td></tr>').join('') + '</table>' +
+    '<p style="font-size:11.5px;color:var(--fg3);margin-top:8px;">O que não aparece aqui fica com o valor padrão e você ajusta na calculadora.</p>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;"><button type="button" class="tb-btn" onclick="fecharModal()">Cancelar</button>' +
+    '<button type="button" class="tb-btn tb-btn-save" onclick="confirmarImportacao()">Preencher novo cálculo</button></div>';
+    corpoModal(h);
+  } catch (e) {
+    avisarErro('Não foi possível abrir ' + file.name + ': ' + (e && e.message || e));
+  }
+}
+function confirmarImportacao() {
+  const r = _importacao;if (!r) return;
+  const seguir = () => aplicarEAvisar(r.dados, nomeDoProjeto(r.dados, r.nome), 'Arquivo importado: ' + r.nome + '. Confira os valores.');
+  if (_sujo) perguntarSalvarAntes('Importar ' + r.nome, seguir);else seguir();
+}
+
+function perguntarSalvarAntes(titulo, continuar) {
+  _continuacao = continuar;
+  const nuvem = window.Nuvem && window.Nuvem.usuario && window.Nuvem.usuario.liberado;
+  abrirModal(titulo, 'Deseja salvar o projeto que está aberto antes de continuar?');
+  corpoModal('<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">' +
+  '<button type="button" class="tb-btn tb-btn-save" onclick="salvarAntesEContinuar(\'arquivo\')">Salvar arquivo (.json)</button>' + (
+  nuvem ? '<button type="button" class="tb-btn tb-btn-save" onclick="salvarAntesEContinuar(\'nuvem\')">Salvar na nuvem</button>' : '') +
+  '<button type="button" class="tb-btn" onclick="salvarAntesEContinuar(\'nao\')">Não salvar</button>' +
+  '<button type="button" class="tb-btn" id="btn-cancelar-antes" onclick="fecharModal()">Cancelar</button></div>');
+  const c = document.getElementById('btn-cancelar-antes');if (c) c.focus();
+}
+function salvarAntesEContinuar(como) {
+  const seguir = () => {const f = _continuacao;_continuacao = null;if (f) f();};
+  if (como === 'arquivo') {salvarProjeto();setTimeout(seguir, 400);} else
+  if (como === 'nuvem') {
+    const d = dadosDoProjeto();
+    corpoModal('<p style="font-size:13px;color:var(--fg2);margin-top:10px">Salvando na nuvem…</p>');
+    window.Nuvem.salvarProjeto(nomeDoProjeto(d, 'Projeto sem nome'), d, _projetoNuvemId).
+    then((id) => {_projetoNuvemId = id;avisar('Projeto salvo na nuvem.');seguir();}).
+    catch((e) => corpoModal('<p class="val-bar warn" style="margin-top:10px">' + (e && e.message || e) + '</p>'));
+  } else seguir();
+}
+
+function novoCalculo() {
+  const fazer = () => {
+    const p = JSON.parse(JSON.stringify(_projetoPadrao || dadosDoProjeto()));
+    p.ident = { logradouro: '', trecho: '', responsavel: '' };
+    p.topo = { rows: [{}] };
+    aplicarProjeto(p);
+    _projetoNuvemId = null;_sujo = false;
+    fecharModal();showTab('dim');
+    avisar('Novo cálculo iniciado.');
+  };
+  if (_sujo) perguntarSalvarAntes('Novo cálculo', fazer);else fazer();
+}
+
+
 function initApp(mode) {
   if (!NOMES_AMBIENTE[mode]) mode = mode === 'mobile' ? 'android' : 'desktop';
   _deviceMode = mode;
@@ -3881,6 +4241,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial calculation
   calc();
+  _projetoPadrao = JSON.parse(JSON.stringify(dadosDoProjeto()));_sujo = false;
 
   // Programa iniciado: esconde o aviso e decide entre login e tela inicial
   window.__calcIniciada = true;
@@ -4130,10 +4491,8 @@ function escapar(t) {
 
 function carregarDaNuvem(id) {
   window.Nuvem.abrirProjeto(id).then((p) => {
-    aplicarProjeto(p.dados);
-    _projetoNuvemId = id;
-    fecharModal();
-    avisar('Projeto aberto da nuvem: ' + p.nome + '.');
+    const seguir = () => {aplicarProjeto(p.dados);_projetoNuvemId = id;_sujo = false;registrarRecente(p.dados, p.nome);fecharModal();avisar('Projeto aberto da nuvem: ' + p.nome + '.');};
+    if (_sujo) perguntarSalvarAntes('Abrir ' + p.nome, seguir);else seguir();
   }).catch((e) => avisarErro(e && e.message || e));
 }
 
