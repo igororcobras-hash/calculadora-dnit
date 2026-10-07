@@ -334,7 +334,7 @@ body.mode-ios .field select{-webkit-appearance:none;appearance:none;}
     <div class="msg" id="login-msg"></div>
     <div class="rodape">
       Seu cadastro é analisado pelo administrador antes da liberação.<br>
-      Versão 25 · 07/10/2026
+      Versão 26 · 07/10/2026
     </div>
   </div>
 </div>
@@ -1332,7 +1332,7 @@ Nuvem.abrirProjeto = async function(id){
   const snap = await fs.getDoc(fs.doc(d,'projetos',id));
   if(!snap.exists()) throw new Error('Projeto não encontrado.');
   const v = snap.data();
-  return {id, nome:v.nome, dados: JSON.parse(v.dados||'{}')};
+  return {id, nome:v.nome, uid:v.uid, usuario:v.usuario||'', dados: JSON.parse(v.dados||'{}')};
 };
 
 Nuvem.excluirProjeto = async function(id){
@@ -4389,8 +4389,10 @@ function salvarAntesEContinuar(como) {
   if (como === 'nuvem') {
     const d = dadosDoProjeto();
     corpoModal('<p style="font-size:13px;color:var(--fg2);margin-top:10px">Salvando na nuvem…</p>');
-    window.Nuvem.salvarProjeto(nomeDoProjeto(d, 'Projeto sem nome'), d, _projetoNuvemId).
-    then((id) => {_projetoNuvemId = id;avisar('Projeto salvo na nuvem.');seguir();}).
+    const meu = projetoNuvemEhMeu();
+    const nm = meu ? nomeDoProjeto(d, 'Projeto sem nome') : 'Cópia de ' + (_projetoNuvemNome || nomeDoProjeto(d, 'Projeto sem nome'));
+    window.Nuvem.salvarProjeto(nm, d, idParaSalvar(false)).
+    then((id) => {_projetoNuvemId = id;_projetoNuvemDono = window.Nuvem.usuario.uid;_projetoNuvemNome = nm;avisar('Projeto salvo na nuvem' + (meu ? '.' : ' (cópia no seu nome).'));seguir();}).
     catch((e) => corpoModal('<p class="val-bar warn" style="margin-top:10px">' + (e && e.message || e) + '</p>'));
   } else seguir();
 }
@@ -4655,6 +4657,10 @@ function corpoModal(html) {const c = document.getElementById('modal-corpo');if (
 
 /* ---------------- Projetos na nuvem ---------------- */
 let _projetoNuvemId = null;
+let _projetoNuvemDono = null,_projetoNuvemNome = '',_projetoNuvemDonoNome = ''; // dono (uid) e nome do projeto aberto da nuvem
+// Só o dono altera o próprio projeto. Se o projeto aberto é de outra pessoa (administrador), salva-se uma cópia no nome de quem está logado.
+function projetoNuvemEhMeu() {const u = window.Nuvem && window.Nuvem.usuario;return !_projetoNuvemId || !_projetoNuvemDono || u && u.uid === _projetoNuvemDono;}
+function idParaSalvar(forcarNovo) {return !forcarNovo && _projetoNuvemId && projetoNuvemEhMeu() ? _projetoNuvemId : null;}
 
 function dadosDoProjeto() {
   return {
@@ -4677,19 +4683,28 @@ function dadosDoProjeto() {
 function salvarNaNuvem() {
   const N = window.Nuvem;
   if (!N || !N.usuario || !N.usuario.liberado) {avisarErro('Acesso não liberado.');return;}
-  const sugestao = (s('logradouro') || 'Projeto') + (s('trecho') ? ' — ' + s('trecho') : '');
+  const base = (s('logradouro') || 'Projeto') + (s('trecho') ? ' — ' + s('trecho') : '');
+  const alheio = _projetoNuvemId && !projetoNuvemEhMeu();
+  const sugestao = alheio ? 'Cópia de ' + (_projetoNuvemNome || base) : base;
   abrirModal('Salvar na nuvem', 'O projeto fica guardado no servidor, disponível em qualquer computador.');
-  corpoModal('<div class="field" style="margin-top:10px"><label>Nome do projeto</label>' +
-  '<input type="text" id="nv_nome" value="' + sugestao.replace(/"/g, '&quot;') + '"></div>' +
-  '<button class="tb-btn tb-btn-save" style="margin-top:10px" onclick="confirmarSalvarNuvem()">Salvar</button>' + (
-  _projetoNuvemId ? '<p style="font-size:11.5px;color:var(--fg3);margin-top:8px">Já existe um projeto aberto da nuvem. Salvar vai atualizá-lo.</p>' : ''));
+  let h = '<div class="field" style="margin-top:10px"><label>Nome do projeto</label>' +
+  '<input type="text" id="nv_nome" value="' + escapar(sugestao) + '"></div>';
+  if (alheio) {
+    h += '<p class="val-bar warn" style="margin-top:10px">Este projeto foi salvo por <strong>' + escapar(_projetoNuvemDonoNome || 'outro usuário') + '</strong>, e só ele pode alterá-lo. Será salva uma <strong>cópia no seu nome</strong>; o original continua como está.</p>' +
+    '<button class="tb-btn tb-btn-save" style="margin-top:10px" onclick="confirmarSalvarNuvem(true)">Salvar cópia</button>';
+  } else if (_projetoNuvemId) {
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="tb-btn tb-btn-save" onclick="confirmarSalvarNuvem(false)">Atualizar este projeto</button>' +
+    '<button class="tb-btn" onclick="confirmarSalvarNuvem(true)">Salvar como novo (outro nome)</button></div>' +
+    '<p style="font-size:11.5px;color:var(--fg3);margin-top:8px">"Atualizar" substitui o projeto aberto. "Salvar como novo" cria outro, e o aberto não muda.</p>';
+  } else h += '<button class="tb-btn tb-btn-save" style="margin-top:10px" onclick="confirmarSalvarNuvem(false)">Salvar</button>';
+  corpoModal(h);
 }
 
-function confirmarSalvarNuvem() {
+function confirmarSalvarNuvem(novo) {
   const nome = (document.getElementById('nv_nome') || {}).value || 'Projeto sem nome';
   corpoModal('<p style="font-size:13px;color:var(--fg2);margin-top:10px">Salvando…</p>');
-  window.Nuvem.salvarProjeto(nome, dadosDoProjeto(), _projetoNuvemId).
-  then((id) => {_projetoNuvemId = id;fecharModal();avisar('Projeto salvo na nuvem: ' + nome + '.');}).
+  window.Nuvem.salvarProjeto(nome, dadosDoProjeto(), idParaSalvar(novo)).
+  then((id) => {_projetoNuvemId = id;_projetoNuvemDono = window.Nuvem.usuario.uid;_projetoNuvemNome = nome;_sujo = false;fecharModal();avisar('Projeto salvo na nuvem: ' + nome + '.');}).
   catch((e) => corpoModal('<p class="val-bar warn" style="margin-top:10px">' + (e && e.message || e) + '</p>'));
 }
 
@@ -4720,7 +4735,7 @@ function escapar(t) {
 
 function carregarDaNuvem(id) {
   window.Nuvem.abrirProjeto(id).then((p) => {
-    const seguir = () => {aplicarProjeto(p.dados);_projetoNuvemId = id;_sujo = false;registrarRecente(p.dados, p.nome);fecharModal();avisar('Projeto aberto da nuvem: ' + p.nome + '.');};
+    const seguir = () => {aplicarProjeto(p.dados);_projetoNuvemId = id;_projetoNuvemDono = p.uid || null;_projetoNuvemNome = p.nome || '';_projetoNuvemDonoNome = p.usuario || '';_sujo = false;registrarRecente(p.dados, p.nome);fecharModal();avisar('Projeto aberto da nuvem: ' + p.nome + '.');};
     if (_sujo) perguntarSalvarAntes('Abrir ' + p.nome, seguir);else seguir();
   }).catch((e) => avisarErro(e && e.message || e));
 }
