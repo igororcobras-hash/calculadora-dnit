@@ -182,11 +182,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 .sessao-bar .selo{background:rgba(255,255,255,.18);border-radius:3px;padding:2px 6px;font-weight:700;font-size:10px;letter-spacing:.5px;text-transform:uppercase;}
 #modal{position:fixed;top:0;right:0;bottom:0;left:0;z-index:9997;background:rgba(0,0,0,.45);
   display:flex;padding:24px 16px;overflow-y:auto;}
-#modal .cx{background:var(--bg2);color:var(--fg);border-radius:8px;max-width:720px;width:100%;margin:auto;
+#modal .cx{background:var(--bg2);color:var(--fg);border-radius:8px;max-width:1040px;width:100%;margin:auto;
   padding:18px 20px;box-shadow:0 8px 32px rgba(0,0,0,.3);}
 #modal h3{font-size:16px;font-weight:700;color:var(--accent);margin-bottom:4px;}
 #modal .fechar{float:right;background:none;border:1px solid var(--border);border-radius:5px;
   color:var(--fg2);cursor:pointer;padding:4px 10px;font-size:12px;font-family:inherit;}
+.tabela-rolagem{overflow-x:auto;max-width:100%;}
+.lista-nuvem .acoes{display:flex;flex-wrap:wrap;gap:4px;}
+.lista-nuvem .badge{white-space:nowrap;}
 .lista-nuvem{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:12px;}
 .lista-nuvem th{background:var(--bg);color:var(--fg2);padding:6px 8px;text-align:left;font-size:11px;border-bottom:1px solid var(--border);}
 .lista-nuvem td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
@@ -3857,7 +3860,7 @@ function abrirAdmin() {
     lista.sort((x, y) => (ordem[estado(x)] === 4 ? -1 : ordem[estado(x)]) - (ordem[estado(y)] === 4 ? -1 : ordem[estado(y)]) || (x.nome || x.usuario).localeCompare(y.nome || y.usuario));
     const rotulo = { adm: 'Administrador', rec: 'Recusado', pen: 'Aguardando aprovação', ven: 'Licença vencida', ok: 'Ativo' };
     const cor = { adm: 'badge-info', rec: 'badge-warn', pen: 'badge-warn', ven: 'badge-warn', ok: 'badge-ok' };
-    let h = '<table class="lista-nuvem"><tr><th>E-mail</th><th>Nome / Empresa</th><th>Validade</th><th>Situação</th><th></th></tr>';
+    let h = '<div class="tabela-rolagem"><table class="lista-nuvem"><tr><th>E-mail</th><th>Nome / Empresa</th><th>Validade</th><th>Situação</th><th></th></tr>';
     lista.forEach((u) => {
       const e = estado(u);
       const dt = u.validade ? u.validade.toISOString().slice(0, 10) : '';
@@ -3869,18 +3872,18 @@ function abrirAdmin() {
       if (e !== 'adm') acoes = bt('Bloquear', false, false);
       if (!u.uid) {
         h += '<tr><td>' + escapar(u.email) + '</td><td colspan="2" style="color:var(--fg3)">Administrador da lista oficial</td>' +
-        '<td><span class="badge badge-info">Administrador · nunca entrou</span></td><td style="white-space:nowrap">' + redef + '</td></tr>';
+        '<td><span class="badge badge-info">Administrador · nunca entrou</span></td><td><div class="acoes">' + redef + '</div></td></tr>';
         return;
       }
       h += '<tr' + (e === 'pen' ? ' style="background:var(--warn)"' : '') + '><td>' + escapar(u.email || u.usuario) + '</td>' +
       '<td><input type="text" id="an_' + u.uid + '" value="' + escapar(u.nome) + '" placeholder="nome" style="width:110px"> ' +
       '<input type="text" id="ae_' + u.uid + '" value="' + escapar(u.empresa) + '" placeholder="empresa" style="width:110px"></td>' +
-      '<td><input type="date" id="av_' + u.uid + '" value="' + dt + '"></td>' +
+      '<td>' + (e === 'adm' ? '<span style="color:var(--fg3)">sem prazo</span><input type="hidden" id="av_' + u.uid + '" value="">' : '<input type="date" id="av_' + u.uid + '" value="' + dt + '">') + '</td>' +
       '<td><span class="badge ' + cor[e] + '">' + rotulo[e] + '</span></td>' +
-      '<td style="white-space:nowrap">' + acoes + redef +
-      '<button class="tb-btn" onclick="salvarUsuario(\'' + u.uid + '\',null,null)">Gravar</button></td></tr>';
+      '<td><div class="acoes">' + acoes + redef +
+      '<button class="tb-btn" onclick="salvarUsuario(\'' + u.uid + '\',null,null)">Gravar</button></div></td></tr>';
     });
-    corpoModal(h + '</table><p style="font-size:11.5px;color:var(--fg3);margin-top:10px">' +
+    corpoModal(h + '</table></div><p style="font-size:11.5px;color:var(--fg3);margin-top:10px">' +
     'Os cadastros novos chegam sozinhos, pela tela de login. “Aprovar” libera o acesso (com a validade da linha, se houver); ' +
     '“Recusar” e “Bloquear” impedem o uso e podem ser desfeitos a qualquer momento.</p>');
   }).catch((e) => corpoModal('<p class="val-bar warn" style="margin-top:10px">' + (e && e.message || e) + '</p>'));
