@@ -202,6 +202,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   .usuarios-tab input[type=text],.usuarios-tab input[type=date]{width:100%!important;margin-bottom:4px;}
 }
 .lista-nuvem .acoes{display:flex;flex-wrap:wrap;gap:4px;}
+.lista-nuvem .progs{display:flex;flex-direction:column;gap:3px;font-size:12px;white-space:nowrap;}
+.lista-nuvem .progs label{display:flex;align-items:center;gap:5px;cursor:pointer;}
+.lista-nuvem .progs .pediu{font-size:10px;font-weight:700;color:var(--warn-fg);background:var(--warn);border:1px solid var(--warn-border);border-radius:8px;padding:0 5px;}
 .lista-nuvem .badge{white-space:nowrap;}
 .lista-nuvem{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:12px;}
 .lista-nuvem th{background:var(--bg);color:var(--fg2);padding:6px 8px;text-align:left;font-size:11px;border-bottom:1px solid var(--border);}
@@ -1351,6 +1354,8 @@ Nuvem.listarUsuarios = async function(){
     const venc = paraData(v.validade);
     return {uid:x.id, usuario:v.usuario||'', nome:v.nome||'', empresa:v.empresa||'',
             email:v.email||'', ativo:!!v.ativo, recusado:!!v.recusado,
+            orcamentoAtivo:!!v.orcamentoAtivo, intertravadoAtivo:!!v.intertravadoAtivo,
+            orcamentoSolicitado:!!v.orcamentoSolicitado, intertravadoSolicitado:!!v.intertravadoSolicitado,
             criadoEm: paraData(v.criadoEm), validade:venc,
             admin: admins.indexOf(String(v.email||'').toLowerCase()) >= 0 || !!v.admin,
             vencida: !!(venc && venc.getTime() < Date.now())};
@@ -1369,6 +1374,8 @@ Nuvem.atualizarUsuario = async function(uid, campos){
   if(!u || !u.admin) throw new Error('Somente administradores.');
   const corpo = {};
   if('ativo'    in campos) corpo.ativo   = !!campos.ativo;
+  if('orcamentoAtivo'    in campos) corpo.orcamentoAtivo    = !!campos.orcamentoAtivo;
+  if('intertravadoAtivo' in campos) corpo.intertravadoAtivo = !!campos.intertravadoAtivo;
   if('recusado' in campos) corpo.recusado = !!campos.recusado;
   if('nome'     in campos) corpo.nome    = String(campos.nome||'').slice(0,120);
   if('empresa'  in campos) corpo.empresa = String(campos.empresa||'').slice(0,120);
@@ -4586,7 +4593,7 @@ function atualizarSeloPendentes() {
   const N = window.Nuvem,b = document.getElementById('btn-usuarios');
   if (!N || !b) return;
   N.listarUsuarios().then((l) => {
-    const n = l.filter((x) => !x.admin && !x.ativo && !x.recusado).length;
+    const n = l.filter((x) => !x.admin && !x.recusado && !PROGRAMAS.some((p) => x[p.campo])).length;
     b.textContent = n ? 'Usuários (' + n + ')' : 'Usuários';
     b.title = n ? n + ' cadastro(s) aguardando aprovação' : 'Gerenciar usuários';
   }).catch(() => {});
@@ -4765,43 +4772,72 @@ function confirmarExcluirNuvem(id) {
   catch((e) => corpoModal('<p class="val-bar warn">' + (e && e.message || e) + '</p>'));
 }
 
-/* ---------------- Administração de usuários ---------------- */
+/* ---------------- Administração de usuários ----------------
+   Um login por usuário. Na coluna "Programas" o administrador marca
+   quais programas da Total Civil cada pessoa pode usar. */
+const PROGRAMAS = [
+  { campo: 'ativo',             nome: 'Pavimento Flexível',     pedido: null },
+  { campo: 'orcamentoAtivo',    nome: 'Orçamento',              pedido: 'orcamentoSolicitado' },
+  { campo: 'intertravadoAtivo', nome: 'Pavimento Intertravado', pedido: 'intertravadoSolicitado' }
+];
+/* Programa que a pessoa pediu ao se cadastrar (quem não pediu outro, veio pelo Pavimento Flexível) */
+function pediuPrograma(u, p) {
+  if (p.pedido) return !!u[p.pedido];
+  return !(u.orcamentoSolicitado || u.intertravadoSolicitado);
+}
+
 function abrirAdmin() {
   const N = window.Nuvem;
   if (!N || !N.usuario || !N.usuario.admin) {avisarErro('Somente administradores.');return;}
-  abrirModal('Usuários', 'Administradores no topo, depois os cadastros pendentes. “Redefinir senha” envia ao e-mail da pessoa um link para criar nova senha.');
+  abrirModal('Usuários', 'Administradores no topo, depois os cadastros pendentes. Marque em “Programas” o que cada pessoa pode usar. “Redefinir senha” envia ao e-mail da pessoa um link para criar nova senha.');
   N.listarUsuarios().then((lista) => {
     if (!lista.length) {corpoModal('<p style="font-size:13px;color:var(--fg2);margin-top:10px">Nenhum usuário cadastrado ainda. Quem criar conta na tela de login aparece aqui.</p>');return;}
-    const estado = (u) => u.admin ? 'adm' : u.recusado ? 'rec' : !u.ativo ? 'pen' : u.vencida ? 'ven' : 'ok';
-    const ordem = { pen: 0, ven: 1, ok: 2, rec: 3, adm: 4 };
-    lista.sort((x, y) => (ordem[estado(x)] === 4 ? -1 : ordem[estado(x)]) - (ordem[estado(y)] === 4 ? -1 : ordem[estado(y)]) || (x.nome || x.usuario).localeCompare(y.nome || y.usuario));
+    const algum = (u) => PROGRAMAS.some((p) => u[p.campo]);
+    const estado = (u) => u.admin ? 'adm' : u.recusado ? 'rec' : !algum(u) ? 'pen' : u.vencida ? 'ven' : 'ok';
+    const ordem = { adm: -1, pen: 0, ven: 1, ok: 2, rec: 3 };
+    lista.sort((x, y) => ordem[estado(x)] - ordem[estado(y)] || (x.nome || x.usuario).localeCompare(y.nome || y.usuario));
     const rotulo = { adm: 'Administrador', rec: 'Recusado', pen: 'Aguardando aprovação', ven: 'Licença vencida', ok: 'Ativo' };
     const cor = { adm: 'badge-info', rec: 'badge-warn', pen: 'badge-warn', ven: 'badge-warn', ok: 'badge-ok' };
-    let h = '<div class="tabela-rolagem"><table class="lista-nuvem usuarios-tab"><tr><th>E-mail</th><th>Nome / Empresa</th><th>Validade</th><th>Situação</th><th></th></tr>';
+    let h = '<div class="tabela-rolagem"><table class="lista-nuvem usuarios-tab"><tr><th>E-mail</th><th>Nome / Empresa</th><th>Programas</th><th>Validade</th><th>Situação</th><th></th></tr>';
     lista.forEach((u) => {
       const e = estado(u);
       const dt = u.validade ? u.validade.toISOString().slice(0, 10) : '';
-      const bt = (txt, ativo, rec) => '<button class="tb-btn" onclick="salvarUsuario(\'' + u.uid + '\',' + ativo + ',' + rec + ')">' + txt + '</button> ';
+      const bt = (txt, acao) => '<button class="tb-btn" onclick="salvarUsuario(\'' + u.uid + '\',\'' + acao + '\')">' + txt + '</button> ';
       const redef = '<button class="tb-btn" data-email="' + escapar(u.email || '') + '" onclick="enviarRedefinicao(this.dataset.email)" title="Envia ao e-mail da pessoa um link para criar nova senha">Redefinir senha</button> ';
       let acoes = '';
-      if (e === 'pen') acoes = bt('Aprovar', true, false) + bt('Recusar', false, true);else
-      if (e === 'rec') acoes = bt('Aprovar', true, false);else
-      if (e !== 'adm') acoes = bt('Bloquear', false, false);
+      if (e === 'pen') acoes = bt('Aprovar', 'aprovar') + bt('Recusar', 'recusar');else
+      if (e === 'rec') acoes = bt('Aprovar', 'aprovar');else
+      if (e !== 'adm') acoes = bt('Bloquear', 'bloquear');
       if (!u.uid) {
-        h += '<tr><td data-l="E-mail">' + escapar(u.email) + '</td><td data-l="Nome / Empresa" colspan="2" style="color:var(--fg3)">Administrador da lista oficial</td>' +
+        h += '<tr><td data-l="E-mail">' + escapar(u.email) + '</td><td data-l="Nome / Empresa" style="color:var(--fg3)">Administrador da lista oficial</td>' +
+        '<td data-l="Programas" style="color:var(--fg3)">todos</td><td data-l="Validade"></td>' +
         '<td data-l="Situação"><span class="badge badge-info">Administrador · nunca entrou</span></td><td data-l="Ações"><div class="acoes">' + redef + '</div></td></tr>';
         return;
+      }
+      let progs;
+      if (e === 'adm') progs = '<span style="color:var(--fg3)">todos</span>';else {
+        progs = '<div class="progs">';
+        PROGRAMAS.forEach((p, k) => {
+          const pediu = pediuPrograma(u, p) && !u[p.campo];
+          const marcado = u[p.campo] || (e === 'pen' && pediu);
+          progs += '<label><input type="checkbox" id="ap' + k + '_' + u.uid + '"' + (marcado ? ' checked' : '') + '> ' + p.nome +
+          (pediu ? ' <span class="pediu" title="A pessoa pediu acesso a este programa">pediu</span>' : '') + '</label>';
+        });
+        progs += '</div>';
       }
       h += '<tr' + (e === 'pen' ? ' style="background:var(--warn)"' : '') + '><td data-l="E-mail">' + escapar(u.email || u.usuario) + '</td>' +
       '<td data-l="Nome / Empresa"><input type="text" id="an_' + u.uid + '" value="' + escapar(u.nome) + '" placeholder="nome" style="width:110px"> ' +
       '<input type="text" id="ae_' + u.uid + '" value="' + escapar(u.empresa) + '" placeholder="empresa" style="width:110px"></td>' +
+      '<td data-l="Programas">' + progs + '</td>' +
       '<td data-l="Validade">' + (e === 'adm' ? '<span style="color:var(--fg3)">sem prazo</span><input type="hidden" id="av_' + u.uid + '" value="">' : '<input type="date" id="av_' + u.uid + '" value="' + dt + '">') + '</td>' +
       '<td data-l="Situação"><span class="badge ' + cor[e] + '">' + rotulo[e] + '</span></td>' +
       '<td data-l="Ações"><div class="acoes">' + acoes + redef +
-      '<button class="tb-btn" onclick="salvarUsuario(\'' + u.uid + '\',null,null)">Gravar</button></div></td></tr>';
+      '<button class="tb-btn" onclick="salvarUsuario(\'' + u.uid + '\',null)">Gravar</button></div></td></tr>';
     });
     corpoModal(h + '</table></div><p style="font-size:11.5px;color:var(--fg3);margin-top:10px">' +
-    'Os cadastros novos chegam sozinhos, pela tela de login. “Aprovar” libera o acesso (com a validade da linha, se houver); ' +
+    'Um único login por pessoa: o mesmo e-mail e senha servem para todos os programas, mas ela só abre os que estiverem marcados em “Programas”. ' +
+    'Os cadastros novos chegam sozinhos, pela tela de login de qualquer programa, já com o programa pedido marcado (“pediu”). ' +
+    '“Aprovar” libera os programas marcados (com a validade da linha, se houver); “Gravar” salva as mudanças da linha; ' +
     '“Recusar” e “Bloquear” impedem o uso e podem ser desfeitos a qualquer momento.</p>');
   }).catch((e) => corpoModal('<p class="val-bar warn" style="margin-top:10px">' + (e && e.message || e) + '</p>'));
 }
@@ -4813,17 +4849,29 @@ function enviarRedefinicao(email) {
   catch((e) => avisarErro(e && e.message || 'Não foi possível enviar.'));
 }
 
-function salvarUsuario(uid, ativo, recusado) {
+/* acao: 'aprovar' | 'recusar' | 'bloquear' | null (Gravar) */
+function salvarUsuario(uid, acao) {
   const campos = {
     nome: (document.getElementById('an_' + uid) || {}).value || '',
     empresa: (document.getElementById('ae_' + uid) || {}).value || '',
     validade: (document.getElementById('av_' + uid) || {}).value || null
   };
-  if (ativo !== null) campos.ativo = ativo;
-  if (recusado !== null) campos.recusado = recusado;
+  let marcou = false;
+  PROGRAMAS.forEach((p, k) => {
+    const cb = document.getElementById('ap' + k + '_' + uid);
+    if (cb) {campos[p.campo] = cb.checked;if (cb.checked) marcou = true;}
+  });
+  if (acao === 'aprovar') {
+    if (!marcou) {avisarErro('Marque em “Programas” ao menos um programa para liberar.');return;}
+    campos.recusado = false;
+  } else if (acao === 'recusar' || acao === 'bloquear') {
+    PROGRAMAS.forEach((p) => {campos[p.campo] = false;});
+    if (acao === 'recusar') campos.recusado = true;
+  }
   window.Nuvem.atualizarUsuario(uid, campos).
   then(() => {avisar('Usuário atualizado.');abrirAdmin();atualizarSeloPendentes();}).
   catch((e) => corpoModal('<p class="val-bar warn">' + (e && e.message || e) + '</p>'));
-}</script>
+}
+</script>
 </body>
 </html>
